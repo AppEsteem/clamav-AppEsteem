@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2024 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+# Copyright (C) 2020-2025 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
 
 include_directories(
     ${LIBXML2_INCLUDE_DIR}
@@ -495,6 +495,8 @@ if(ENABLE_SHARED_LIB)
                     $<TARGET_FILE_DIR:PCRE2::pcre2>
                     $<TARGET_FILE_DIR:LibXml2::LibXml2>
                     $<TARGET_FILE_DIR:JSONC::jsonc>
+                POST_EXCLUDE_REGEXES
+                    "[cC]:[\\/][wW][iI][nN][dD][oO][wW][sS]"
             )
             foreach(_file ${_r_deps})
                 string(TOLOWER ${_file} _file_lower)

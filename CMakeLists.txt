@@ -1,5 +1,5 @@
 
-# Copyright (C) 2019-2024 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+# Copyright (C) 2019-2025 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
 
 if(WIN32)
     cmake_minimum_required( VERSION 3.16 ) # For file(GET_RUNTIME_DEPENDENCIES)
@@ -778,6 +778,8 @@ include(CheckFTS)
 include(CheckUnamePosix)
 # Check support for file descriptor passing
 include(CheckFDPassing)
+# Check support for mallinfo memory stats
+include(CheckMallinfo)
 
 # Check if big-endian
 include(TestBigEndian)

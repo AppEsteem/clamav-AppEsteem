@@ -1,7 +1,7 @@
 /*
  *  Unit tests for bytecode functions.
  *
- *  Copyright (C) 2013-2024 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+ *  Copyright (C) 2013-2025 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
  *  Copyright (C) 2009-2013 Sourcefire, Inc.
  *
  *  Authors: Török Edvin
@@ -501,17 +501,13 @@ END_TEST
 
 static void runload(const char *dbname, struct cl_engine *engine, unsigned signoexp)
 {
-    const char *srcdir = getenv("srcdir");
     char *str;
     unsigned signo = 0;
     int rc;
-    if (!srcdir) {
-        /* when run from automake srcdir is set, but if run manually then not */
-        srcdir = SRCDIR;
-    }
-    str = malloc(strlen(srcdir) + 1 + strlen(dbname) + 1);
+
+    str = malloc(strlen(SRCDIR) + 1 + strlen(dbname) + 1);
     ck_assert_msg(!!str, "malloc");
-    sprintf(str, "%s" PATHSEP "%s", srcdir, dbname);
+    sprintf(str, "%s" PATHSEP "%s", SRCDIR, dbname);
 
     rc = cl_load(str, engine, &signo, CL_DB_STDOPT);
     ck_assert_msg(rc == CL_SUCCESS, "failed to load %s: %s\n",

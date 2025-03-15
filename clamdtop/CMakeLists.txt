@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2024 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+# Copyright (C) 2020-2025 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
 
 if(WIN32)
     add_definitions(-DWIN32_LEAN_AND_MEAN)
@@ -47,6 +47,8 @@ if(WIN32)
             UNRESOLVED_DEPENDENCIES_VAR _u_deps
             DIRECTORIES
                 $<TARGET_FILE_DIR:Curses::curses>
+            POST_EXCLUDE_REGEXES
+                "[cC]:[\\/][wW][iI][nN][dD][oO][wW][sS]"
         )
         foreach(_file ${_r_deps})
             string(TOLOWER ${_file} _file_lower)

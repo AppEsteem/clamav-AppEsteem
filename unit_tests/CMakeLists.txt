@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2024 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+# Copyright (C) 2020-2025 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
 
 #
 # Decrypt test files
@@ -441,6 +441,8 @@ if(WIN32)
                         $<TARGET_FILE_DIR:LibXml2::LibXml2>
                         $<TARGET_FILE_DIR:CURL::libcurl>
                         $<TARGET_FILE_DIR:JSONC::jsonc>
+                    POST_EXCLUDE_REGEXES
+                        "[cC]:[\\/][wW][iI][nN][dD][oO][wW][sS]"
                     CONFLICTING_DEPENDENCIES_PREFIX CTEST_CONFLICTING_DEPENDENCIES
                 )
                 foreach(_file ${_r_deps})
@@ -496,6 +498,8 @@ if(WIN32)
                         $<TARGET_FILE_DIR:PCRE2::pcre2>
                         $<TARGET_FILE_DIR:LibXml2::LibXml2>
                         $<TARGET_FILE_DIR:JSONC::jsonc>
+                    POST_EXCLUDE_REGEXES
+                        "[cC]:[\\/][wW][iI][nN][dD][oO][wW][sS]"
                     CONFLICTING_DEPENDENCIES_PREFIX CTEST_CONFLICTING_DEPENDENCIES
                 )
                 foreach(_file ${_r_deps})

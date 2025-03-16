@@ -3,12 +3,16 @@
 - this will disable the socket functionality and run the scan without a daemon
 - in order to run: `clamd --local-scanning-file <folder/file to scan> --datadir=<directory with signature files>`
 - for building on windows
-	- vcpkg install 'curl[openssl]:x64-windows-static' 'json-c:x64-windows-static' 'libxml2:x64-windows-static' 'pcre2:x64-windows-static' 'pthreads:x64-windows-static' 'zlib:x64-windows-static' 'pdcurses:x64-windows-static' 'bzip2:x64-windows-static' 'check:x64-windows-static' --recurse
-	- mkdir build
-	- cd build
-	- cmake .. -A x64 -D CMAKE_TOOLCHAIN_FILE="%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="%VCPKG_PATH%/vcpkg/installed/x64-windows-static" -D CMAKE_INSTALL_PREFIX="install" -D ENABLE_STATIC_LIB="ON" -D ENABLE_SHARED_LIB="OFF" -D ENABLE_TESTS="false" -D ENABLE_LIBCLAMAV_ONLY="true" -D ENABLE_CLAMD_ONLY="true"
-	- cmake --build . --config Release
-	- cmake --build . --config Release --target install
+  - set up with https://docs.clamav.net/manual/Installing/Installing-from-source-Windows.html
+    - use vcpkg (not mussels)
+    - choco install activeperl fails... install activeperl-5.28 from here: https://platform.activestate.com/ActiveState/ActivePerl-5.28. you'll have to update using "state" a couple of times to get it to work.
+  - then do the following...
+  	- vcpkg install 'curl[openssl]:x64-windows-static' 'json-c:x64-windows-static' 'libxml2:x64-windows-static' 'pcre2:x64-windows-static' 'pthreads:x64-windows-static' 'zlib:x64-windows-static' 'pdcurses:x64-windows-static' 'bzip2:x64-windows-static' 'check:x64-windows-static' --recurse
+	  - mkdir build
+	  - cd build
+	  - cmake .. -A x64 -D CMAKE_TOOLCHAIN_FILE="%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="%VCPKG_PATH%/vcpkg/installed/x64-windows-static" -D CMAKE_INSTALL_PREFIX="install" -D ENABLE_STATIC_LIB="ON" -D ENABLE_SHARED_LIB="OFF" -D ENABLE_TESTS="false" -D ENABLE_LIBCLAMAV_ONLY="true" -D ENABLE_CLAMD_ONLY="true"
+	  - cmake --build . --config Release
+	  - cmake --build . --config Release --target install
 
 # ClamAV
 

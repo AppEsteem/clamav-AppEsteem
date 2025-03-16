@@ -27,6 +27,8 @@
 
 #ifndef _WIN32
 #include <sys/time.h>
+#else
+#include <winsock2.h>
 #endif
 
 typedef struct work_item_tag {

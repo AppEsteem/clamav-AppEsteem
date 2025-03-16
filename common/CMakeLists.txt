@@ -1,4 +1,6 @@
 # Copyright (C) 2020-2025 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
+set(CURL_USE_STATIC_LIBS ON)
+find_package(CURL REQUIRED)
 
 if(WIN32)
     add_definitions(-DWIN32_LEAN_AND_MEAN)

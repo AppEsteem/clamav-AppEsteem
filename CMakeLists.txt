@@ -545,9 +545,9 @@ endif()
 
 # libfreshclam & application dependencies
 if(NOT ENABLE_LIBCLAMAV_ONLY)
-    find_package(CURL REQUIRED)
+find_package(CURL REQUIRED)
 
-    if(ENABLE_APP)
+if(ENABLE_APP)
         find_package(CURSES REQUIRED)
 
         if(NOT WIN32 AND ENABLE_MILTER)
@@ -1040,6 +1040,16 @@ endif()
 
 add_subdirectory( libclamav )
 add_subdirectory( libclamav_rust )
+
+if(ENABLE_CLAMD_ONLY)
+    add_subdirectory( common )
+    add_subdirectory( clamd )
+    if(WIN32)
+        add_subdirectory( win32/conf_examples )
+    else()
+        add_subdirectory( etc )
+    endif()
+endif()
 
 if(NOT ENABLE_LIBCLAMAV_ONLY)
     add_subdirectory( common )

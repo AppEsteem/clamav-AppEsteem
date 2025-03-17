@@ -512,21 +512,3 @@ cl_error_t check_if_cvd_outdated(const char *path, long long days)
 
     return CL_SUCCESS;
 }
-
-#ifdef _WIN32
-// Stubs for inflate64 family functions
-int __stdcall inflate64(z_streamp strm, int flush) {
-    // Simple fallback to regular inflate
-    return inflate(strm, flush);
-}
-
-int __stdcall inflate64End(z_streamp strm) {
-    // Simple fallback to regular inflateEnd
-    return inflateEnd(strm);
-}
-
-int __stdcall inflate64Init2(z_streamp strm, int windowBits) {
-    // Simple fallback to regular inflateInit2
-    return inflateInit2(strm, windowBits);
-}
-#endif

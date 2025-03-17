@@ -10,7 +10,7 @@
   	- vcpkg install 'curl[openssl]:x64-windows-static' 'json-c:x64-windows-static' 'libxml2:x64-windows-static' 'pcre2:x64-windows-static' 'pthreads:x64-windows-static' 'zlib:x64-windows-static' 'pdcurses:x64-windows-static' 'bzip2:x64-windows-static' 'check:x64-windows-static' --recurse
 	  - mkdir build
 	  - cd build
-	  - cmake .. -A x64 -D CMAKE_TOOLCHAIN_FILE="%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="%VCPKG_PATH%/vcpkg/installed/x64-windows-static" -D CMAKE_INSTALL_PREFIX="install" -D ENABLE_STATIC_LIB="ON" -D ENABLE_SHARED_LIB="OFF" -D ENABLE_TESTS="false" -D ENABLE_LIBCLAMAV_ONLY="true" -D ENABLE_CLAMD_ONLY="true"
+	  - cmake .. -A x64 -D CMAKE_TOOLCHAIN_FILE="%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake" -DCMAKE_PREFIX_PATH="%VCPKG_PATH%/installed/x64-windows-static" -D CMAKE_INSTALL_PREFIX="install" -D ENABLE_STATIC_LIB="ON" -D ENABLE_SHARED_LIB="OFF" -D ENABLE_TESTS="false" -D ENABLE_LIBCLAMAV_ONLY="true" -D ENABLE_CLAMD_ONLY="true"
 	  - cmake --build . --config Release
 	  - cmake --build . --config Release --target install
 

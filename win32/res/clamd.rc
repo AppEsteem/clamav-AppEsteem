@@ -1,6 +1,6 @@
-#define RES_FNAME "clamd.exe"
-#define RES_NAME "clamd"
-#define RES_FDESC "ClamAV - clamd"
+#define RES_FNAME "aescan.exe"
+#define RES_NAME "aescan"
+#define RES_FDESC "AppEsteem - aescan"
 #include "common.rc"
 
 1337 ICON "clam.ico"

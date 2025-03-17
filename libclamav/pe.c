@@ -56,7 +56,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -327,13 +329,41 @@ typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
 uint32_t call_csharp(cli_ctx *ctx/*, char* virname*/) {
     char* filename = ctx->target_filepath;
+#ifdef _WIN32
+    void* aepredict_handle = LoadLibrary("AePredict.dll");
+    if (!aepredict_handle) {
+        cli_errmsg("LoadLibrary failed");
+        return 1;
+    }
+    Predict_t Predict = (Predict_t) GetProcAddress((HMODULE) aepredict_handle, "AePredict");
+    if(!Predict) {
+        cli_errmsg("GetProcAddress failed for AePredict");
+        FreeLibrary(aepredict_handle);
+        return 1;
+    }
+    DisposePredictionResult_t DisposePredictionResult = (DisposePredictionResult_t) GetProcAddress((HMODULE) aepredict_handle, "DisposePredictionResult");
+    if(!DisposePredictionResult) {
+        cli_errmsg("GetProcAddress failed for DisposePredictionResult\n");
+        FreeLibrary(aepredict_handle);
+        return 1;
+    }
+#else
     void* aepredict_handle = dlopen("libAePredict.so", RTLD_LAZY);
     if (!aepredict_handle) {
         cli_errmsg("dlopen failed: %s\n", dlerror());
         return 1;
     }
     Predict_t Predict = (Predict_t) dlsym(aepredict_handle, "AePredict");
+    if(!Predict) {
+        cli_errmsg("dlsym failed for AePredict: %s\n", dlerror());
+        return 1;
+    }
     DisposePredictionResult_t DisposePredictionResult = (DisposePredictionResult_t) dlsym(aepredict_handle, "DisposePredictionResult");
+    if(!DisposePredictionResult) {
+        cli_errmsg("dlsym failed for DisposePredictionResult: %s\n", dlerror());
+        return 1;
+    }
+#endif
 
     int fd = open(filename, O_RDONLY);
 
@@ -342,8 +372,9 @@ uint32_t call_csharp(cli_ctx *ctx/*, char* virname*/) {
         return 1;
     }
     // TODO clean up the logging and print formatted json outside of this file
-    cli_errmsg("--------File: %s\n", filename);
+    cli_errmsg("--------File: %s calling predict\n", filename);
     PredictionResult* result = Predict(fd);
+    cli_errmsg("--------File: %s returned predict 0x%x count %d\n", filename, result, result ? result->count : -1);
     int class_index;
     for (class_index = 0; class_index < result->count; class_index++) {
         cli_errmsg("--------%s: %f\n", result->keys[class_index], result->values[class_index]);

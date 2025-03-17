@@ -373,7 +373,12 @@ uint32_t call_csharp(cli_ctx *ctx/*, char* virname*/) {
     }
     // TODO clean up the logging and print formatted json outside of this file
     cli_errmsg("--------File: %s calling predict\n", filename);
+#ifdef WIN32
+    HANDLE hFile = (HANDLE)_get_osfhandle(fd);
+    PredictionResult* result = Predict(hFile);
+#else
     PredictionResult* result = Predict(fd);
+#endif
     cli_errmsg("--------File: %s returned predict 0x%x count %d\n", filename, result, result ? result->count : -1);
     int class_index;
     for (class_index = 0; class_index < result->count; class_index++) {

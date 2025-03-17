@@ -65,11 +65,18 @@ target_link_libraries( common
         CURL::libcurl
         OpenSSL::SSL
         OpenSSL::Crypto )
+
 if(WIN32)
     target_link_libraries( common
         PUBLIC
             crypt32
             psapi)
+    find_package(liblzma CONFIG REQUIRED)
+    find_package(Iconv)
+    target_link_libraries ( common 
+        PUBLIC
+            liblzma::liblzma
+            Iconv::Iconv)
 endif()
 
 if(HAVE_SYSTEMD)

@@ -480,6 +480,15 @@ if(NOT WIN32)
     find_package(Iconv REQUIRED)
     # Set variable required by libclamav to use iconv
     set(HAVE_ICONV 1)
+else()
+    #do it for win32 too
+    find_package(Iconv REQUIRED)
+    # Set variable required by libclamav to use iconv
+    set(HAVE_ICONV 1)
+endif()
+
+if(WIN32)
+    find_package(LibLZMA REQUIRED)
 endif()
 
 if(ENABLE_JSON_SHARED)

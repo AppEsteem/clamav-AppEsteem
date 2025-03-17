@@ -754,7 +754,7 @@ int main(int argc, char **argv)
                 }
             }
         }
-#ifndef _WIN32
+
         if (do_local_scan) {
             /*logg(LOGG_ERROR, "Going to do a local scan!!\n");*/
             max_threads = optget(opts, "MaxThreads")->numarg;
@@ -800,7 +800,7 @@ int main(int argc, char **argv)
             logg(LOGG_INFO, "killed pool\n");
         }
 
-
+#ifndef _WIN32
         if (localsock && num_fd == 0) {
             int *t;
             mode_t sock_mode, umsk = umask(0777); /* socket is created with 000 to avoid races */

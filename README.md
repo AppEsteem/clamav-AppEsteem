@@ -14,6 +14,26 @@
 	  - cmake --build . --config Release
 	  - cmake --build . --config Release --target install
 
+## Build Instructions
+#### For Dev on Linux
+```
+mkdir build
+cd build
+cmake .. -G Ninja                   \
+    -D CMAKE_BUILD_TYPE="Debug"     \
+    -D OPTIMIZE=OFF                 \
+    -D CMAKE_INSTALL_PREFIX=install \
+    -D ENABLE_MILTER=ON             \
+    -D ENABLE_EXAMPLES=ON           \
+    -D ENABLE_STATIC_LIB=ON         \
+    -D ENABLE_SYSTEMD=OFF
+
+ninja
+ninja install
+```
+
+Then, go to `build/install/etc/`, and copy `clamd.conf.sample` into `clamd.conf`. Then remove the word "Example" in that file.      
+
 # ClamAV
 
 <p align="center">

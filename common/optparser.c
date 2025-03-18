@@ -710,7 +710,7 @@ void fix_paths(void)
     _DATADIR[sizeof(_DATADIR) - 1] = '\0';
     _CONFDIR[sizeof(_CONFDIR) - 1] = '\0';
     if (have_cdir) {
-        snprintf(_CONFDIR_CLAMD, sizeof(_CONFDIR_CLAMD), "%s\\%s", _CONFDIR, "clamd.conf");
+        snprintf(_CONFDIR_CLAMD, sizeof(_CONFDIR_CLAMD), "%s\\%s", _CONFDIR, "aescan.conf");
         snprintf(_CONFDIR_FRESHCLAM, sizeof(_CONFDIR_FRESHCLAM), "%s\\%s", _CONFDIR, "freshclam.conf");
         snprintf(_CONFDIR_MILTER, sizeof(_CONFDIR_MILTER), "%s\\%s", _CONFDIR, "clamav-milter.conf");
     }

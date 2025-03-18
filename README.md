@@ -6,6 +6,8 @@
   - set up with https://docs.clamav.net/manual/Installing/Installing-from-source-Windows.html
     - use vcpkg (not mussels)
     - choco install activeperl fails... install activeperl-5.28 from here: https://platform.activestate.com/ActiveState/ActivePerl-5.28. you'll have to update using "state" a couple of times to get it to work.
+    - make sure rust default is set up right:
+      - rustup default stable-x86_64-pc-windows-msvc --force-non-host
   - then do the following...
   	- vcpkg install 'curl[openssl]:x64-windows-static' 'json-c:x64-windows-static' 'libxml2:x64-windows-static' 'pcre2:x64-windows-static' 'pthreads:x64-windows-static' 'zlib:x64-windows-static' 'pdcurses:x64-windows-static' 'bzip2:x64-windows-static' 'check:x64-windows-static' 'libiconv:x64-windows-static' 'liblzma:x64-windows-static' --recurse
 	  - mkdir build

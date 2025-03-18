@@ -3,4 +3,4 @@
 #define RES_FDESC "AppEsteem - aescan"
 #include "common.rc"
 
-1337 ICON "clam.ico"
+1337 ICON "aescan.ico"

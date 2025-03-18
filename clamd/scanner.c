@@ -319,7 +319,7 @@ cl_error_t scan_callback(STATBUF *sb, char *filename, const char *msg, enum cli_
             if (context.virsize && optget(scandata->opts, "ExtendedDetectionInfo")->enabled)
                 logg(LOGG_INFO, "%s: %s(%s:%llu) FOUND\n", filename, virname, context.virhash, context.virsize);
             else
-                logg(LOGG_INFO, "%s: %s FOUND\n", filename, virname);
+                logg(LOGG_INFO, "%s: %s FOUND\n", filename, virname); // NOTE this is the main print function
         }
     } else if (ret != CL_CLEAN) {
         scandata->errors++;

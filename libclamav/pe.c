@@ -327,7 +327,7 @@ typedef struct PredictionResult_t {
 typedef PredictionResult* (*Predict_t)(int fd);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
-uint32_t call_csharp(cli_ctx *ctx/*, char* virname*/) {
+uint32_t call_csharp(cli_ctx *ctx) {
     char* filename = ctx->target_filepath;
 #ifdef _WIN32
     void* aepredict_handle = LoadLibrary("AePredict.dll");
@@ -388,13 +388,20 @@ uint32_t call_csharp(cli_ctx *ctx/*, char* virname*/) {
     cli_errmsg("--------Confidence: %c\n", result->confidence);
     cli_errmsg("--------Should Check: %d\n", result->shouldcheck);
 
-    DisposePredictionResult(result);
     close(fd);
 
     // TODO properly add the virname with cli_append_virus
     if (result->shouldcheck) {
+        // malloc space for a 64 char string 
+        /*char* virname = (char*) malloc(64 * sizeof(char));*/
+        char virname[64];
+        snprintf(virname, 64, "{\"verdict\":\"%s\", \"confidence\":\"%c\"}", result->verdict, result->confidence);
+        /*cli_errmsg(virname);*/
+        cli_append_virus(ctx, virname);
+        /*free(virname);*/
         return CL_VIRUS;
     }
+    DisposePredictionResult(result);
     return CL_SUCCESS;
 }
 
@@ -711,13 +718,16 @@ static cl_error_t scan_pe_mdb(cli_ctx *ctx, struct cli_exe_section *exe_section)
 
     /* Do scans */
     for (type = CLI_HASH_MD5; type < CLI_HASH_AVAIL_TYPES; type++) {
+        /*cli_errmsg("checking hashes\n");*/
         if (foundsize[type] && cli_hm_scan(hashset[type], exe_section->rsz, &virname, mdb_sect, type) == CL_VIRUS) {
+            /*cli_errmsg("found md5 virus\n");*/
             ret = cli_append_virus(ctx, virname);
             if (ret != CL_SUCCESS) {
                 break;
             }
         }
         if (foundwild[type] && cli_hm_scan_wild(hashset[type], &virname, mdb_sect, type) == CL_VIRUS) {
+            /*cli_errmsg("found other hash virus\n");*/
             ret = cli_append_virus(ctx, virname);
             if (ret != CL_SUCCESS) {
                 break;

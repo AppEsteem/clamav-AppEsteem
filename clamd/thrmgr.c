@@ -688,9 +688,12 @@ static void *thrmgr_worker(void *arg)
                                             &(threadpool->pool_mutex), &timeout);
             if (retval == ETIMEDOUT) {
                 must_exit = TRUE;
-                logg(LOGG_ERROR, "timeout: exiting\n");
+                /*logg(LOGG_ERROR, "timeout: exiting\n");*/
                 break;
             }
+            /*else {*/
+            /*    logg(LOGG_ERROR, "found a job\n");*/
+            /*}*/
         }
         threadpool->thr_idle--;
         if (threadpool->state == POOL_EXIT) {

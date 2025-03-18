@@ -763,7 +763,8 @@ int main(int argc, char **argv)
             /*logg(LOGG_ERROR, "Going to do a local scan!!\n");*/
             max_threads = optget(opts, "MaxThreads")->numarg;
             max_queue   = optget(opts, "MaxQueue")->numarg;
-            idletimeout = optget(opts, "IdleTimeout")->numarg;
+            /*idletimeout = optget(opts, "IdleTimeout")->numarg;*/
+            idletimeout = 0; // trying idle timeout to zero to see if thread manager continues to assign tasks
 
             if ((thr_pool = thrmgr_new(max_threads, idletimeout, max_queue, scanner_thread)) == NULL) {
                 /*logg(LOGG_ERROR, "thrmgr_new failed\n");*/
@@ -773,8 +774,6 @@ int main(int argc, char **argv)
             }
 
             client_conn_t conn;
-            /*const char *cmd = NULL;*/
-            /*int rc;*/
             struct cl_scan_options options;
             memset(&options, 0, sizeof(struct cl_scan_options));
             /* New data available to read on socket. */
@@ -815,9 +814,9 @@ int main(int argc, char **argv)
             execute_or_dispatch_command(&conn, COMMAND_MULTISCAN, local_scan_file);
             /*logg(LOGG_INFO, "Dispatch done, now waiting for threads to finish.\n");*/
             thrmgr_wait_for_threads(thr_pool);
-            logg(LOGG_INFO, "Threads finished!\n");
+            /*logg(LOGG_INFO, "Threads finished!\n");*/
             thrmgr_destroy(thr_pool);
-            logg(LOGG_INFO, "killed pool\n");
+            /*logg(LOGG_INFO, "killed pool\n");*/
         }
 
 #ifndef _WIN32

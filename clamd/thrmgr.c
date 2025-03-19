@@ -90,6 +90,7 @@ static int work_queue_add(work_queue_t *work_q, void *data)
         work_q->tail       = work_item;
         work_q->item_count++;
     }
+    // cli_errmsg("work_queue_add: %d items\n", work_q->item_count);
     return TRUE;
 }
 
@@ -109,6 +110,7 @@ static void *work_queue_pop(work_queue_t *work_q)
     }
     free(work_item);
     work_q->item_count--;
+    // cli_errmsg("work_queue_pop: %d items\n", work_q->item_count);
     return data;
 }
 
@@ -804,6 +806,13 @@ int thrmgr_dispatch(threadpool_t *threadpool, void *user_data)
 
 int thrmgr_group_dispatch(threadpool_t *threadpool, jobgroup_t *group, void *user_data, int bulk)
 {
+    /*
+    {
+        client_conn_t *userconn = (client_conn_t *) user_data;
+        cli_errmsg("thrmgr_group_dispatch: group 0x%x bulk 0x%x filename [%s]\n", group, bulk, userconn && userconn->filename ? userconn->filename : "NONAME");
+    }
+    */
+
     int ret;
     if (group) {
         pthread_mutex_lock(&group->mutex);

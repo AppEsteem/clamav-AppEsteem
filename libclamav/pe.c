@@ -333,6 +333,9 @@ typedef void (*DisposePredictionResult_t)(PredictionResult* result);
  *
  * 1) move the header LoadLibrary/dlopen code to sometime during setup
  * 2) see if we should be using ctx->target_filepath or ctx->sub_filepath (i think we need sub like if it's in a zip)
+ * 3) figure out memory strategy for the virname to return
+ * 4) find out why threads are calling the same file multiple times
+ * 5) thread pool cleanup at the end
  */
 uint32_t call_csharp(cli_ctx *ctx) {
     char* filename = ctx->target_filepath;
@@ -399,12 +402,10 @@ uint32_t call_csharp(cli_ctx *ctx) {
     // TODO properly add the virname with cli_append_virus
     if (result && result->shouldcheck) {
         // malloc space for a 64 char string 
-        /*char* virname = (char*) malloc(64 * sizeof(char));*/
-        char virname[64];
-        snprintf(virname, 64, "{\"verdict\":\"%s\", \"confidence\":\"%c\"}", result->verdict, result->confidence);
-        /*cli_errmsg(virname);*/
-        cli_append_virus(ctx, virname);
-        /*free(virname);*/
+        // char* virname = (char*) malloc(256 * sizeof(char));
+        // snprintf(virname, 256, "{\"verdict\":\"%s\", \"confidence\":\"%c\"}", result->verdict, result->confidence);
+        cli_append_virus(ctx, "AppEsteem_To_Inspect");
+        // free(virname);
         DisposePredictionResult(result);
         return CL_VIRUS;
     }

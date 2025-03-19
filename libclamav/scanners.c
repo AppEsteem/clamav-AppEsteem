@@ -5429,7 +5429,9 @@ cl_error_t cli_magic_scan(cli_ctx *ctx, cli_file_t type)
                 // Setting ctx->corrupted_input will prevent the PE parser from reporting "broken executable" for unpacked/reconstructed files that may not be 100% to spec.
                 // In here we're just carrying the corrupted_input flag from parent to child, in case the parent's flag was set.
                 unsigned int corrupted_input = ctx->corrupted_input;
+                // cli_errmsg("cli_magic_scan: cli_scanpe(%s)\n", ctx->target_filepath);
                 ret                          = cli_scanpe(ctx);
+                cli_errmsg("cli_magic_scan: cli_scanpe(%s) returned 0x%x\n", ctx->target_filepath, ret);
                 ctx->corrupted_input         = corrupted_input;
             }
             perf_nested_stop(ctx, PERFT_PE, PERFT_SCAN);

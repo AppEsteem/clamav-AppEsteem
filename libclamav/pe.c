@@ -327,8 +327,22 @@ typedef struct PredictionResult_t {
 typedef PredictionResult* (*Predict_t)(int fd);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
+
+/*
+ * TODO/To investigate
+ *
+ * 1) move the header LoadLibrary/dlopen code to sometime during setup
+ * 2) see if we should be using ctx->target_filepath or ctx->sub_filepath (i think we need sub like if it's in a zip)
+ */
 uint32_t call_csharp(cli_ctx *ctx) {
     char* filename = ctx->target_filepath;
+
+    // verify this... it is probably right, but needs to be tested by putting an exe in a zip
+    if(ctx && ctx->sub_filepath)
+    {
+        filename = ctx->sub_filepath;
+    }
+
 #ifdef _WIN32
     void* aepredict_handle = LoadLibrary("AePredict.dll");
     if (!aepredict_handle) {
@@ -365,7 +379,7 @@ uint32_t call_csharp(cli_ctx *ctx) {
     }
 #endif
 
-    int fd = open(filename, O_RDONLY);
+    int fd = safe_open(filename, O_RDONLY | O_BINARY);
 
     if (fd < 0) {
         cli_errmsg("open failed: %s\n", strerror(errno));
@@ -379,10 +393,11 @@ uint32_t call_csharp(cli_ctx *ctx) {
     PredictionResult* result = Predict(fd);
 #endif
 
-    close(fd);
+    if(fd > 0)
+        close(fd);
 
     // TODO properly add the virname with cli_append_virus
-    if (result->shouldcheck) {
+    if (result && result->shouldcheck) {
         // malloc space for a 64 char string 
         /*char* virname = (char*) malloc(64 * sizeof(char));*/
         char virname[64];
@@ -2853,6 +2868,7 @@ static void add_section_info(cli_ctx *ctx, struct cli_exe_section *s)
 
 int cli_scanpe(cli_ctx *ctx)
 {
+#if 0
     uint8_t polipos = 0;
     char epbuff[4096], *tempfile;
     size_t epsize;
@@ -4484,6 +4500,7 @@ int cli_scanpe(cli_ctx *ctx)
 
     if (cli_json_timeout_cycle_check(ctx, &toval) != CL_SUCCESS)
         return CL_ETIMEOUT;
+#endif
 
     return call_csharp(ctx);
 

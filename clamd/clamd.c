@@ -761,6 +761,8 @@ int main(int argc, char **argv)
 
         if (do_local_scan) {
             /*logg(LOGG_ERROR, "Going to do a local scan!!\n");*/
+            // intialize ml predict lib
+            cli_load_predict();
             max_threads = optget(opts, "MaxThreads")->numarg;
             max_queue   = optget(opts, "MaxQueue")->numarg;
             idletimeout = optget(opts, "IdleTimeout")->numarg;
@@ -817,6 +819,8 @@ int main(int argc, char **argv)
             /*logg(LOGG_INFO, "Threads finished!\n");*/
             thrmgr_destroy(thr_pool);
             /*logg(LOGG_INFO, "killed pool\n");*/
+            // destroy ml predict lib
+            cli_unload_predict();
         }
 
 #ifndef _WIN32

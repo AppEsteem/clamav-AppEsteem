@@ -372,21 +372,12 @@ uint32_t call_csharp(cli_ctx *ctx) {
         return 1;
     }
     // TODO clean up the logging and print formatted json outside of this file
-    cli_errmsg("--------File: %s calling predict\n", filename);
 #ifdef WIN32
     HANDLE hFile = (HANDLE)_get_osfhandle(fd);
     PredictionResult* result = Predict(hFile);
 #else
     PredictionResult* result = Predict(fd);
 #endif
-    cli_errmsg("--------File: %s returned predict 0x%x count %d\n", filename, result, result ? result->count : -1);
-    int class_index;
-    for (class_index = 0; class_index < result->count; class_index++) {
-        cli_errmsg("--------%s: %f\n", result->keys[class_index], result->values[class_index]);
-    }
-    cli_errmsg("--------Verdict: %s\n", result->verdict);
-    cli_errmsg("--------Confidence: %c\n", result->confidence);
-    cli_errmsg("--------Should Check: %d\n", result->shouldcheck);
 
     close(fd);
 
@@ -399,6 +390,7 @@ uint32_t call_csharp(cli_ctx *ctx) {
         /*cli_errmsg(virname);*/
         cli_append_virus(ctx, virname);
         /*free(virname);*/
+        DisposePredictionResult(result);
         return CL_VIRUS;
     }
     DisposePredictionResult(result);

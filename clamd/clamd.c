@@ -763,8 +763,8 @@ int main(int argc, char **argv)
             /*logg(LOGG_ERROR, "Going to do a local scan!!\n");*/
             max_threads = optget(opts, "MaxThreads")->numarg;
             max_queue   = optget(opts, "MaxQueue")->numarg;
-            /*idletimeout = optget(opts, "IdleTimeout")->numarg;*/
-            idletimeout = 0; // trying idle timeout to zero to see if thread manager continues to assign tasks
+            idletimeout = optget(opts, "IdleTimeout")->numarg;
+            /* idletimeout = 0; */ // trying idle timeout to zero to see if thread manager continues to assign tasks
 
             if ((thr_pool = thrmgr_new(max_threads, idletimeout, max_queue, scanner_thread)) == NULL) {
                 /*logg(LOGG_ERROR, "thrmgr_new failed\n");*/

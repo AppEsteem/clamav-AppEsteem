@@ -449,7 +449,7 @@ uint32_t call_predict(cli_ctx *ctx) {
             break;
         }
 
-        cli_errmsg("call_predict predicting for %s HANDLE 0x%x\n", filename, hFile);
+        // cli_errmsg("call_predict predicting for %s HANDLE 0x%x\n", filename, hFile);
         result = g_Predict(hFile);
 
         CloseHandle(hFile);
@@ -471,7 +471,7 @@ uint32_t call_predict(cli_ctx *ctx) {
         close(fd);
 #endif
 
-        cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
+        // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
         if (result && result->shouldcheck) {
             cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
             retval = CL_VIRUS;

@@ -327,90 +327,164 @@ typedef struct PredictionResult_t {
 typedef PredictionResult* (*Predict_t)(int fd);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
+static void *g_aepredict_handle;
+static Predict_t g_Predict;
+static DisposePredictionResult_t g_DisposePredictionResult;
+
+extern cl_error_t cli_load_predict()
+{
+    cl_error_t retval = CL_ERROR;
+
+    do
+    {
+        // open libs and get addresses
+#ifdef _WIN32
+        g_aepredict_handle = LoadLibrary("AePredict.dll");
+        if (!g_aepredict_handle) {
+            cli_errmsg("cli_load_predict: LoadLibrary failed\n");
+            retval = CL_ERROR;
+            break;
+        }
+        g_Predict = (Predict_t) GetProcAddress((HMODULE) g_aepredict_handle, "AePredict");
+        if(!g_Predict) {
+            cli_errmsg("cli_load_predict: GetProcAddress failed for AePredict\n");
+            retval = CL_ERROR;
+            break;
+        }
+        g_DisposePredictionResult = (DisposePredictionResult_t) GetProcAddress((HMODULE) g_aepredict_handle, "DisposePredictionResult");
+        if(!g_DisposePredictionResult) {
+            cli_errmsg("cli_load_predict: GetProcAddress failed for DisposePredictionResult\n");
+            retval = CL_ERROR;
+            break;
+        }
+#else
+        g_aepredict_handle = dlopen("libAePredict.so", RTLD_LAZY);
+        if (!g_aepredict_handle) {
+            cli_errmsg("cli_load_predict: dlopen failed: %s\n", dlerror());
+            retval = CL_ERROR;
+            break;
+        }
+        g_Predict = (Predict_t) dlsym(g_aepredict_handle, "AePredict");
+        if(!g_Predict) {
+            cli_errmsg("cli_load_predict: dlsym failed for AePredict: %s\n", dlerror());
+            retval = CL_ERROR;
+            break;
+        }
+        g_DisposePredictionResult = (DisposePredictionResult_t) dlsym(g_aepredict_handle, "DisposePredictionResult");
+        if(!g_DisposePredictionResult) {
+            cli_errmsg("cli_load_predict: dlsym failed for DisposePredictionResult: %s\n", dlerror());
+            retval = CL_ERROR;
+            break;
+        }
+#endif
+    } while(0);
+
+    return retval;
+}
+
+extern cl_error_t cli_unload_predict()
+{
+    cl_error_t retval = CL_ERROR;
+
+    do
+    {
+        if(g_aepredict_handle) {
+#ifdef _WIN32
+            FreeLibrary(g_aepredict_handle);
+#else
+            dl_close(g_ae_predict_handle);
+#endif
+        }
+        g_aepredict_handle = NULL;
+        g_Predict = NULL;
+        g_DisposePredictionResult = NULL;
+    } while(0);
+
+    return retval;
+}
 
 /*
  * TODO/To investigate
  *
  * 1) move the header LoadLibrary/dlopen code to sometime during setup
- * 2) see if we should be using ctx->target_filepath or ctx->sub_filepath (i think we need sub like if it's in a zip)
+ * 2) see if we should be using ctx->target_filepath or ctx->sub_filepath (SOLVED: sub_filepath should be used if not null)
  * 3) figure out memory strategy for the virname to return
- * 4) find out why threads are calling the same file multiple times
+ * 4) find out why threads are calling the same file multiple times SOLVED: it's the sub_filepath)
  * 5) thread pool cleanup at the end
  */
-uint32_t call_csharp(cli_ctx *ctx) {
+uint32_t call_predict(cli_ctx *ctx) {
     char* filename = ctx->target_filepath;
 
-    // verify this... it is probably right, but needs to be tested by putting an exe in a zip
+    if(!g_aepredict_handle || !g_DisposePredictionResult || !g_Predict) {
+        cli_errmsg("call_predict: call cli_load_predict first\n");
+        return CL_ERROR;
+    }
+
+    // it is probably right, but needs to be tested by putting an exe in a zip
     if(ctx && ctx->sub_filepath)
     {
         filename = ctx->sub_filepath;
     }
 
-#ifdef _WIN32
-    void* aepredict_handle = LoadLibrary("AePredict.dll");
-    if (!aepredict_handle) {
-        cli_errmsg("LoadLibrary failed");
-        return 1;
-    }
-    Predict_t Predict = (Predict_t) GetProcAddress((HMODULE) aepredict_handle, "AePredict");
-    if(!Predict) {
-        cli_errmsg("GetProcAddress failed for AePredict");
-        FreeLibrary(aepredict_handle);
-        return 1;
-    }
-    DisposePredictionResult_t DisposePredictionResult = (DisposePredictionResult_t) GetProcAddress((HMODULE) aepredict_handle, "DisposePredictionResult");
-    if(!DisposePredictionResult) {
-        cli_errmsg("GetProcAddress failed for DisposePredictionResult\n");
-        FreeLibrary(aepredict_handle);
-        return 1;
-    }
-#else
-    void* aepredict_handle = dlopen("libAePredict.so", RTLD_LAZY);
-    if (!aepredict_handle) {
-        cli_errmsg("dlopen failed: %s\n", dlerror());
-        return 1;
-    }
-    Predict_t Predict = (Predict_t) dlsym(aepredict_handle, "AePredict");
-    if(!Predict) {
-        cli_errmsg("dlsym failed for AePredict: %s\n", dlerror());
-        return 1;
-    }
-    DisposePredictionResult_t DisposePredictionResult = (DisposePredictionResult_t) dlsym(aepredict_handle, "DisposePredictionResult");
-    if(!DisposePredictionResult) {
-        cli_errmsg("dlsym failed for DisposePredictionResult: %s\n", dlerror());
-        return 1;
-    }
-#endif
+    uint32_t retval = CL_SUCCESS;
+    PredictionResult *result = NULL;
 
-    int fd = safe_open(filename, O_RDONLY | O_BINARY);
-
-    if (fd < 0) {
-        cli_errmsg("open failed: %s\n", strerror(errno));
-        return 1;
-    }
-    // TODO clean up the logging and print formatted json outside of this file
+    do
+    {
+        // open file and get fd/handle
 #ifdef WIN32
-    HANDLE hFile = (HANDLE)_get_osfhandle(fd);
-    PredictionResult* result = Predict(hFile);
+        HANDLE hFile = CreateFileA(
+            filename,
+            GENERIC_READ,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL
+        );
+
+        if (hFile == INVALID_HANDLE_VALUE) {
+            cli_errmsg("call_predict: open %s failed: error code %lu\n", filename, GetLastError());
+            retval = CL_ERROR;
+            break;
+        }
+
+        cli_errmsg("call_predict predicting for %s HANDLE 0x%x\n", filename, hFile);
+        result = g_Predict(hFile);
+
+        CloseHandle(hFile);
 #else
-    PredictionResult* result = Predict(fd);
+        int fd = safe_open(filename, O_RDONLY | O_CLOEXEC);
+
+        if (fd < 0) {
+            cli_errmsg("call_predict: open failed: %s\n", strerror(errno));
+            retval = CL_ERROR;
+            break;
+        }
+
+        // Allow deletion while open
+        fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+
+        // cli_errmsg("call_predict predicting for %s fd 0x%x\n", filename, fd);
+        result = g_Predict(fd);
+
+        close(fd);
 #endif
 
-    if(fd > 0)
-        close(fd);
+        cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
+        if (result && result->shouldcheck) {
+            cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
+            retval = CL_VIRUS;
+        }
+    
+    } while (false);
 
-    // TODO properly add the virname with cli_append_virus
-    if (result && result->shouldcheck) {
-        // malloc space for a 64 char string 
-        // char* virname = (char*) malloc(256 * sizeof(char));
-        // snprintf(virname, 256, "{\"verdict\":\"%s\", \"confidence\":\"%c\"}", result->verdict, result->confidence);
-        cli_append_virus(ctx, "AppEsteem_To_Inspect");
-        // free(virname);
-        DisposePredictionResult(result);
-        return CL_VIRUS;
+    // clean up prediction results
+    if(result) {
+        g_DisposePredictionResult(result);
     }
-    DisposePredictionResult(result);
-    return CL_SUCCESS;
+
+    return retval;
 }
 
 /* Given an RVA (relative to the ImageBase), return the file offset of the
@@ -4503,9 +4577,15 @@ int cli_scanpe(cli_ctx *ctx)
         return CL_ETIMEOUT;
 #endif
 
-    return call_csharp(ctx);
+    {
+        int ret = CL_SUCCESS;
+        // cli_errmsg("calling predict %s %s\n", ctx->target_filepath, ctx->sub_filepath ? ctx->sub_filepath : "NULL");
+        ret = call_predict(ctx);
+        // cli_errmsg("returning %d predict %s %s\n", ret, ctx->target_filepath, ctx->sub_filepath ? ctx->sub_filepath : "NULL");
+        return(ret);
+    }
 
-    /*return CL_SUCCESS;*/
+    return CL_SUCCESS;
 }
 
 cl_error_t cli_pe_targetinfo(cli_ctx *ctx, struct cli_exe_info *peinfo)

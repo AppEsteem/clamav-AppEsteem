@@ -413,71 +413,26 @@ extern cl_error_t cli_unload_predict()
  * 5) thread pool cleanup at the end
  */
 uint32_t call_predict(cli_ctx *ctx) {
-    char* filename = ctx->target_filepath;
-
+    uint32_t retval = CL_SUCCESS;
+ 
     if(!g_aepredict_handle || !g_DisposePredictionResult || !g_Predict) {
         cli_errmsg("call_predict: call cli_load_predict first\n");
         return CL_ERROR;
     }
 
-    // it is probably right, but needs to be tested by putting an exe in a zip
+    char* filename = ctx->target_filepath;
     if(ctx && ctx->sub_filepath)
     {
         filename = ctx->sub_filepath;
     }
 
-    uint32_t retval = CL_SUCCESS;
-    PredictionResult *result = NULL;
+    PredictionResult *result = g_Predict(filename);
 
-    do
-    {
-        // open file and get fd/handle
-#ifdef WIN32
-        HANDLE hFile = CreateFileA(
-            filename,
-            GENERIC_READ,
-            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            NULL,
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
-            NULL
-        );
-
-        if (hFile == INVALID_HANDLE_VALUE) {
-            cli_errmsg("call_predict: open %s failed: error code %lu\n", filename, GetLastError());
-            retval = CL_ERROR;
-            break;
-        }
-
-        // cli_errmsg("call_predict predicting for %s HANDLE 0x%x\n", filename, hFile);
-        result = g_Predict(hFile);
-
-        CloseHandle(hFile);
-#else
-        int fd = safe_open(filename, O_RDONLY | O_CLOEXEC);
-
-        if (fd < 0) {
-            cli_errmsg("call_predict: open failed: %s\n", strerror(errno));
-            retval = CL_ERROR;
-            break;
-        }
-
-        // Allow deletion while open
-        fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
-
-        // cli_errmsg("call_predict predicting for %s fd 0x%x\n", filename, fd);
-        result = g_Predict(fd);
-
-        close(fd);
-#endif
-
-        // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
-        if (result && result->shouldcheck) {
-            cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
-            retval = CL_VIRUS;
-        }
-    
-    } while (false);
+    // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
+    if (result && result->shouldcheck) {
+        cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
+        retval = CL_VIRUS;
+    }
 
     // clean up prediction results
     if(result) {

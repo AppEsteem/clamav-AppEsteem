@@ -12,6 +12,14 @@ Example
 # Default: yes
 #DoAEPredict no
 
+# Path to the database directory.
+# Default: hardcoded (depends on installation options)
+#DatabaseDirectory /var/lib/clamav
+
+# Optional path to the global temporary directory.
+# Default: system specific (usually /tmp or /var/tmp).
+#TemporaryDirectory /var/tmp
+
 # ClamD settings below
 
 # Uncomment this option to enable logging.
@@ -82,14 +90,6 @@ Example
 # also owned by root to keep other users from tampering with it.
 # Default: disabled
 #PidFile /run/clamav/clamd.pid
-
-# Optional path to the global temporary directory.
-# Default: system specific (usually /tmp or /var/tmp).
-#TemporaryDirectory /var/tmp
-
-# Path to the database directory.
-# Default: hardcoded (depends on installation options)
-#DatabaseDirectory /var/lib/clamav
 
 # Only load the official signatures published by the ClamAV project.
 # Default: no

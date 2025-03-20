@@ -80,6 +80,8 @@
 
 #include "clamav_rust.h"
 
+#include "predict.h"
+
 cl_unrar_error_t (*cli_unrar_open)(const char *filename, void **hArchive, char **comment, uint32_t *comment_size, uint8_t debug_flag);
 cl_unrar_error_t (*cli_unrar_peek_file_header)(void *hArchive, unrar_metadata_t *file_metadata);
 cl_unrar_error_t (*cli_unrar_extract_file)(void *hArchive, const char *destPath, char *outputBuffer);
@@ -616,8 +618,11 @@ struct cl_engine *cl_engine_new(void)
 
 #endif
 
-    /* inidtialize prediciton */
-    cli_load_predict();
+    /* initialize prediciton */
+    new->aepredict_handle = NULL;
+    new->predict_handle = NULL;
+    new->dispose_prediction_result_handle = NULL;
+    engine_load_predict(new);
 
     cli_dbgmsg("Initialized %s engine\n", cl_retver());
     return new;

@@ -593,6 +593,8 @@ extern LIBCLAMAV_EXPORT int have_rar;
 #define SCAN_DEV_COLLECT_SHA (ctx->options->dev & CL_SCAN_DEV_COLLECT_SHA)
 #define SCAN_DEV_COLLECT_PERF_INFO (ctx->options->dev & CL_SCAN_DEV_COLLECT_PERFORMANCE_INFO)
 
+#define SCAN_AE_PREDICT (ctx->options->general & AE_PREDICT_ENABLED)
+
 /* based on macros from A. Melnikoff */
 #define cbswap16(v) (((v & 0xff) << 8) | (((v) >> 8) & 0xff))
 #define cbswap32(v) ((((v)&0x000000ff) << 24) | (((v)&0x0000ff00) << 8) | \

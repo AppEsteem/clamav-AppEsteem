@@ -82,6 +82,8 @@
 #include "cache.h"
 #include "openioc.h"
 
+#include "predict.h"
+
 #ifdef CL_THREAD_SAFE
 #include <pthread.h>
 static pthread_mutex_t cli_ref_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -5877,7 +5879,7 @@ cl_error_t cl_engine_free(struct cl_engine *engine)
         TASK_COMPLETE();
 
         /* unload predict */
-        cli_unload_predict();
+        engine_unload_predict(engine);
     }
 
 #ifdef USE_MPOOL

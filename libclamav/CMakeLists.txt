@@ -397,6 +397,8 @@ set(LIBCLAMAV_SOURCES
     gif.c               gif.h
     # UDF partition
     udf.c               udf.h
+    # AEPredict 
+    predict.c           predict.h
 )
 
 if(ENABLE_SHARED_LIB)

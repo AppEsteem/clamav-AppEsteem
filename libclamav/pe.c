@@ -56,9 +56,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#ifndef _WIN32
+/*#ifndef _WIN32*/
 #include <dlfcn.h>
-#endif
+/*#endif*/
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -314,94 +314,93 @@ static int versioninfo_cb(void *opaque, uint32_t type, uint32_t name, uint32_t l
     return 0;
 }
 
-// rewrite the above struct in C
-typedef struct PredictionResult_t {
-    char** keys; // Pointer to an array of strings
-    double* values; // Pointer to an array of doubles
-    int count; // Number of items
-    char* verdict; // pointer to a string for the verdict
-    bool shouldcheck; // true if we should flag this file for checking (deceptorheavy)
-    int confidence; // how confident we are with this verdit (H/M/L)
-} PredictionResult;
+/*typedef struct PredictionResult_t {*/
+/*    char** keys; // Pointer to an array of strings*/
+/*    double* values; // Pointer to an array of doubles*/
+/*    int count; // Number of items*/
+/*    char* verdict; // pointer to a string for the verdict*/
+/*    bool shouldcheck; // true if we should flag this file for checking (deceptorheavy)*/
+/*    int confidence; // how confident we are with this verdit (H/M/L)*/
+/*} PredictionResult;*/
 
-typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);
-typedef void (*DisposePredictionResult_t)(PredictionResult* result);
+/*typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);*/
+/*typedef void (*DisposePredictionResult_t)(PredictionResult* result);*/
 
-static void *g_aepredict_handle;
-static Predict_t g_Predict;
-static DisposePredictionResult_t g_DisposePredictionResult;
+/*static void *g_aepredict_handle;*/
+/*static Predict_t g_Predict;*/
+/*static DisposePredictionResult_t g_DisposePredictionResult;*/
 
-cl_error_t cli_load_predict()
-{
-    cl_error_t retval = CL_ERROR;
+/*cl_error_t cli_load_predict()*/
+/*{*/
+/*    cl_error_t retval = CL_ERROR;*/
+/**/
+/*    do*/
+/*    {*/
+/*        // open libs and get addresses*/
+/*#ifdef _WIN32*/
+/*        g_aepredict_handle = LoadLibrary("AePredict.dll");*/
+/*        if (!g_aepredict_handle) {*/
+/*            cli_errmsg("cli_load_predict: LoadLibrary failed\n");*/
+/*            retval = CL_ERROR;*/
+/*            break;*/
+/*        }*/
+/*        g_Predict = (Predict_t) GetProcAddress((HMODULE) g_aepredict_handle, "AePredict");*/
+/*        if(!g_Predict) {*/
+/*            cli_errmsg("cli_load_predict: GetProcAddress failed for AePredict\n");*/
+/*            retval = CL_ERROR;*/
+/*            break;*/
+/*        }*/
+/*        g_DisposePredictionResult = (DisposePredictionResult_t) GetProcAddress((HMODULE) g_aepredict_handle, "DisposePredictionResult");*/
+/*        if(!g_DisposePredictionResult) {*/
+/*            cli_errmsg("cli_load_predict: GetProcAddress failed for DisposePredictionResult\n");*/
+/*            retval = CL_ERROR;*/
+/*            break;*/
+/*        }*/
+/*#else*/
+/*        g_aepredict_handle = dlopen("libAePredict.so", RTLD_LAZY);*/
+/*        if (!g_aepredict_handle) {*/
+/*            cli_errmsg("cli_load_predict: dlopen failed: %s\n", dlerror());*/
+/*            retval = CL_ERROR;*/
+/*            break;*/
+/*        }*/
+/*        g_Predict = (Predict_t) dlsym(g_aepredict_handle, "AePredict");*/
+/*        if(!g_Predict) {*/
+/*            cli_errmsg("cli_load_predict: dlsym failed for AePredict: %s\n", dlerror());*/
+/*            retval = CL_ERROR;*/
+/*            break;*/
+/*        }*/
+/*        g_DisposePredictionResult = (DisposePredictionResult_t) dlsym(g_aepredict_handle, "DisposePredictionResult");*/
+/*        if(!g_DisposePredictionResult) {*/
+/*            cli_errmsg("cli_load_predict: dlsym failed for DisposePredictionResult: %s\n", dlerror());*/
+/*            retval = CL_ERROR;*/
+/*            break;*/
+/*        }*/
+/*#endif*/
+/*    } while(0);*/
+/**/
+/*    return retval;*/
+/*}*/
 
-    do
-    {
-        // open libs and get addresses
-#ifdef _WIN32
-        g_aepredict_handle = LoadLibrary("AePredict.dll");
-        if (!g_aepredict_handle) {
-            cli_errmsg("cli_load_predict: LoadLibrary failed\n");
-            retval = CL_ERROR;
-            break;
-        }
-        g_Predict = (Predict_t) GetProcAddress((HMODULE) g_aepredict_handle, "AePredict");
-        if(!g_Predict) {
-            cli_errmsg("cli_load_predict: GetProcAddress failed for AePredict\n");
-            retval = CL_ERROR;
-            break;
-        }
-        g_DisposePredictionResult = (DisposePredictionResult_t) GetProcAddress((HMODULE) g_aepredict_handle, "DisposePredictionResult");
-        if(!g_DisposePredictionResult) {
-            cli_errmsg("cli_load_predict: GetProcAddress failed for DisposePredictionResult\n");
-            retval = CL_ERROR;
-            break;
-        }
-#else
-        g_aepredict_handle = dlopen("libAePredict.so", RTLD_LAZY);
-        if (!g_aepredict_handle) {
-            cli_errmsg("cli_load_predict: dlopen failed: %s\n", dlerror());
-            retval = CL_ERROR;
-            break;
-        }
-        g_Predict = (Predict_t) dlsym(g_aepredict_handle, "AePredict");
-        if(!g_Predict) {
-            cli_errmsg("cli_load_predict: dlsym failed for AePredict: %s\n", dlerror());
-            retval = CL_ERROR;
-            break;
-        }
-        g_DisposePredictionResult = (DisposePredictionResult_t) dlsym(g_aepredict_handle, "DisposePredictionResult");
-        if(!g_DisposePredictionResult) {
-            cli_errmsg("cli_load_predict: dlsym failed for DisposePredictionResult: %s\n", dlerror());
-            retval = CL_ERROR;
-            break;
-        }
-#endif
-    } while(0);
-
-    return retval;
-}
-
-cl_error_t cli_unload_predict()
-{
-    cl_error_t retval = CL_ERROR;
-
-    do
-    {
-        if(g_aepredict_handle) {
-#ifdef _WIN32
-            FreeLibrary(g_aepredict_handle);
-#else
-            dl_close(g_ae_predict_handle);
-#endif
-        }
-        g_aepredict_handle = NULL;
-        g_Predict = NULL;
-        g_DisposePredictionResult = NULL;
-    } while(0);
-
-    return retval;
-}
+/*cl_error_t cli_unload_predict()*/
+/*{*/
+/*    cl_error_t retval = CL_ERROR;*/
+/**/
+/*    do*/
+/*    {*/
+/*        if(g_aepredict_handle) {*/
+/*#ifdef _WIN32*/
+/*            FreeLibrary(g_aepredict_handle);*/
+/*#else*/
+/*            dlclose(g_aepredict_handle);*/
+/*#endif*/
+/*        }*/
+/*        g_aepredict_handle = NULL;*/
+/*        g_Predict = NULL;*/
+/*        g_DisposePredictionResult = NULL;*/
+/*    } while(0);*/
+/**/
+/*    return retval;*/
+/*}*/
 
 /*
  * TODO/To investigate
@@ -410,8 +409,9 @@ cl_error_t cli_unload_predict()
  */
 uint32_t call_predict(cli_ctx *ctx) {
     uint32_t retval = CL_SUCCESS;
+    /*cli_errmsg("call_predict: ctx->target_filepath: %s\n", ctx->target_filepath);*/
  
-    if(!g_aepredict_handle || !g_DisposePredictionResult || !g_Predict) {
+    if(!ctx->engine->aepredict_handle || !ctx->engine->predict_handle || !ctx->engine->dispose_prediction_result_handle) {
         cli_errmsg("call_predict: call cli_load_predict first\n");
         return CL_ERROR;
     }
@@ -433,7 +433,8 @@ uint32_t call_predict(cli_ctx *ctx) {
         }
     }
 
-    PredictionResult *result = g_Predict(filename, buf, len);
+    /*cli_errmsg("call_predict: calling g_Predict\n");*/
+    PredictionResult *result = ctx->engine->predict_handle(filename, buf, len);
 
     // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
     if (result && result->shouldcheck) {
@@ -441,10 +442,11 @@ uint32_t call_predict(cli_ctx *ctx) {
         cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
         retval = CL_VIRUS;
     }
+    /*cli_errmsg("call_predict: prediction result\n");*/
 
     // clean up prediction results
     if(result) {
-        g_DisposePredictionResult(result);
+        ctx->engine->dispose_prediction_result_handle(result);
     }
 
     return retval;

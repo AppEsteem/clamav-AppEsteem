@@ -324,7 +324,7 @@ typedef struct PredictionResult_t {
     int confidence; // how confident we are with this verdit (H/M/L)
 } PredictionResult;
 
-typedef PredictionResult* (*Predict_t)(int fd);
+typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
 static void *g_aepredict_handle;
@@ -406,11 +406,7 @@ extern cl_error_t cli_unload_predict()
 /*
  * TODO/To investigate
  *
- * 1) move the header LoadLibrary/dlopen code to sometime during setup
- * 2) see if we should be using ctx->target_filepath or ctx->sub_filepath (SOLVED: sub_filepath should be used if not null)
- * 3) figure out memory strategy for the virname to return
- * 4) find out why threads are calling the same file multiple times SOLVED: it's the sub_filepath)
- * 5) thread pool cleanup at the end
+ * 1) see if we can use the ctx->map and not re-open the file
  */
 uint32_t call_predict(cli_ctx *ctx) {
     uint32_t retval = CL_SUCCESS;
@@ -420,16 +416,28 @@ uint32_t call_predict(cli_ctx *ctx) {
         return CL_ERROR;
     }
 
-    char* filename = ctx->target_filepath;
+    const char* filename = ctx->target_filepath;
     if(ctx && ctx->sub_filepath)
     {
         filename = ctx->sub_filepath;
     }
 
-    PredictionResult *result = g_Predict(filename);
+    // map contains memory-mapped file... let's pass that in and hope it works :-)
+    const void *buf = NULL;
+    uint32_t len = 0;
+    if(ctx && ctx->fmap && ctx->fmap->len) {
+        len = ctx->fmap->len;
+        if (!(buf = fmap_need_off_once(ctx->fmap, 0, ctx->fmap->len))) {
+            cli_errmsg("call_predict: error reading map\n");
+            return CL_EREAD;
+        }
+    }
+
+    PredictionResult *result = g_Predict(filename, buf, len);
 
     // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
     if (result && result->shouldcheck) {
+        // note that the virus must some static string - nobody frees it later
         cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
         retval = CL_VIRUS;
     }

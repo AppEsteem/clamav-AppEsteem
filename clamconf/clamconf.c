@@ -63,7 +63,7 @@ static struct _cfgfile {
     const char *name;
     int tool;
 } cfgfile[] = {
-    {"clamd.conf", OPT_CLAMD},
+    {"aescan.conf", OPT_CLAMD},
     {"freshclam.conf", OPT_FRESHCLAM},
     {"clamav-milter.conf", OPT_MILTER},
     {NULL, 0}};

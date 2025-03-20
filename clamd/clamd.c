@@ -760,6 +760,13 @@ int main(int argc, char **argv)
         }
 
         if (do_local_scan) {
+            if (opts->filename == NULL || *opts->filename == NULL) {
+                logg(LOGG_ERROR, "No filename specified for local scan\n");
+                /*ret = 1;*/
+                /*break;*/
+            } else {
+                logg(LOGG_ERROR, "file is %s\n", *opts->filename);
+            }
             /*logg(LOGG_ERROR, "Going to do a local scan!!\n");*/
             max_threads = optget(opts, "MaxThreads")->numarg;
             max_queue   = optget(opts, "MaxQueue")->numarg;

@@ -82,7 +82,7 @@ static bool is_initialized = false;
 #endif
 char _DATADIR[MAX_PATH]           = BACKUP_DATADIR;
 char _CONFDIR[MAX_PATH]           = BACKUP_CONFDIR;
-char _CONFDIR_CLAMD[MAX_PATH]     = BACKUP_CONFDIR "\\clamd.conf";
+char _CONFDIR_CLAMD[MAX_PATH]     = BACKUP_CONFDIR "\\aescan.conf";
 char _CONFDIR_FRESHCLAM[MAX_PATH] = BACKUP_CONFDIR "\\freshclam.conf";
 char _CONFDIR_MILTER[MAX_PATH]    = BACKUP_CONFDIR "\\clamav-milter.conf";
 

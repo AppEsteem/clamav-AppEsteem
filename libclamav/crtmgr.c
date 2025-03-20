@@ -199,6 +199,22 @@ cli_crt *crtmgr_block_list_lookup(crtmgr *m, cli_crt *x509)
     return NULL;
 }
 
+// this only looks at the subject sha1 - useful when we're trying to collect more
+// uses/mis-uses of a subject, or when we're dealing with Azure Trusted Signing,
+// where signing certs last only three days
+cli_crt *crtmgr_subject_block_list_lookup(crtmgr *m, cli_crt *x509)
+{
+    cli_crt *i;
+    for (i = m->crts; i; i = i->next) {
+        if (!i->isBlocked ||
+            memcmp(i->subject, x509->subject, sizeof(i->subject))) {
+            continue;
+        }
+        return i;
+    }
+    return NULL;
+}
+
 /* Determine whether x509 already exists in m. The fields compared depend on
  * whether x509 is a block entry or a trusted certificate */
 cli_crt *crtmgr_lookup(crtmgr *m, cli_crt *x509)

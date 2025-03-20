@@ -1642,6 +1642,23 @@ static cl_error_t asn1_parse_mscat(struct cl_engine *engine, fmap_t *map, size_t
                          * or it's sigtool doing cert printing. */
                     }
 
+                    /*
+                     * AE: this subject-only is useful for Azure Trusted Signing, where they generate new certs for their customers every three days. 
+                     *      matching on subject only means we'll get a hit when the subject matches, which can help us look for
+                     *      certificate fraud/evasion too, at the cost of more files we'll need to inspect.
+                     */
+                    if (NULL != (crt = crtmgr_subject_block_list_lookup(&(engine->cmgr), x509))) {
+                        ret = CL_VIRUS;
+                        cli_dbgmsg("asn1_parse_mscat: Found Authenticode certificate blocked by SUBJECT %s\n", crt->name ? crt->name : "(unnamed CRB rule)");
+                        if (NULL != ctx) {
+                            ret = cli_append_virus(ctx, crt->name ? crt->name : "(unnamed CRB rule)");
+                            if (ret == CL_VIRUS) {
+                                crtmgr_free(&newcerts);
+                                goto finish;
+                            }
+                        }
+                    }
+
                     /* NOTE: Since the 'issuer' cli_crt field is required for
                      * Authenticode validation, we rely on adding embedded
                      * certs with the 'issuer' actually set into our trust

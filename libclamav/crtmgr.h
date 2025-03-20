@@ -89,6 +89,7 @@ void crtmgr_free(crtmgr *m);
 bool crtmgr_add(crtmgr *m, cli_crt *x509);
 cli_crt *crtmgr_lookup(crtmgr *m, cli_crt *x509);
 cli_crt *crtmgr_block_list_lookup(crtmgr *m, cli_crt *x509);
+cli_crt *crtmgr_subject_block_list_lookup(crtmgr *m, cli_crt *x509);
 cli_crt *crtmgr_trust_list_lookup(crtmgr *m, cli_crt *x509, int crb_crts_only);
 void crtmgr_del(crtmgr *m, cli_crt *x509);
 cli_crt *crtmgr_verify_crt(crtmgr *m, cli_crt *x509);

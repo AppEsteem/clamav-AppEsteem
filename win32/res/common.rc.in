@@ -35,7 +35,7 @@ BEGIN
             VALUE "FileVersion", REPO_VERSION
             VALUE "InternalName", RES_NAME
             VALUE "OriginalFilename", RES_FNAME
-            VALUE "ProductName", "AppEsteem AeScsn"
+            VALUE "ProductName", "AppEsteem AeScan"
             VALUE "ProductVersion", RES_VER_S " ("  REPO_VERSION ")"
             VALUE "LegalCopyright", "(C) 2025 AppEsteem Corporation"
             VALUE "LegalTrademarks", "License: GNU GPL, Version 2"

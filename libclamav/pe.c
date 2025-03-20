@@ -4404,7 +4404,9 @@ int cli_scanpe(cli_ctx *ctx)
     {
         int ret = CL_SUCCESS;
         // cli_errmsg("calling predict %s %s\n", ctx->target_filepath, ctx->sub_filepath ? ctx->sub_filepath : "NULL");
-        ret = call_predict(ctx);
+        if (SCAN_AE_PREDICT) {
+            ret = call_predict(ctx);
+        }
         // cli_errmsg("returning %d predict %s %s\n", ret, ctx->target_filepath, ctx->sub_filepath ? ctx->sub_filepath : "NULL");
         return(ret);
     }

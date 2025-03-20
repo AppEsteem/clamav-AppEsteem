@@ -669,8 +669,8 @@ const struct clam_option __clam_options[] = {
 
     /* AEScan Specific Options */ 
     /* name, longopt, sopt, argtype, regex, num, str, flags, owner, description, suggested */
-    /*{"DoLocalScan", "do-localscan", 'do-local-scan', CLOPT_TYPE_BOOL, MATCH_BOOL, 0, NULL, 0, OPT_CLAMD | OPT_FRESHCLAM, "Enable Local Scan", "no"},*/
     {"LocalScanningFile", "local-scanning-file", 0, CLOPT_TYPE_STRING, NULL, -1, NULL, 0, OPT_CLAMD | OPT_FRESHCLAM, "Scan files directly without using a daemon. File path for scanning.", "/home/"},
+    {"DoAEPredict", "do-aepredict", 0, CLOPT_TYPE_BOOL, MATCH_BOOL, 1, NULL, 0, OPT_CLAMD | OPT_FRESHCLAM, "Enable AE Predict", "yes"},
 
     {NULL, NULL, 0, 0, NULL, 0, NULL, 0, 0, NULL, NULL}};
 const struct clam_option *clam_options = __clam_options;

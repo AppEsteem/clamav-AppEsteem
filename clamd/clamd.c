@@ -777,8 +777,10 @@ int main(int argc, char **argv)
             struct cl_scan_options options;
             memset(&options, 0, sizeof(struct cl_scan_options));
             /* New data available to read on socket. */
+            int do_mlpredict = optget(opts, "DoAEPredict")->enabled;
 
             options.general |= AE_SCAN_LOCAL_SCAN;
+            options.general |= do_mlpredict ? AE_PREDICT_ENABLED : 0;
             options.general |= CL_SCAN_GENERAL_COLLECT_METADATA;
 
             // default scanning options from clamdscan - parsing more types of files

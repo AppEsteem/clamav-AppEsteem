@@ -172,6 +172,7 @@ struct cl_scan_options {
 
 /* AEScan options */
 #define AE_SCAN_LOCAL_SCAN                          0x40 /* scan local files only */
+#define AE_PREDICT_ENABLED                          0x80 /* use AE Predict in scanning */
 
 /* parsing capabilities options */
 #define CL_SCAN_PARSE_ARCHIVE                       0x1

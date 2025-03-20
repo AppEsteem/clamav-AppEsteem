@@ -7,6 +7,13 @@
 # Comment or remove the line below.
 Example
 
+# AE Conf Settings 
+# Enable AE Predict
+# Default: yes
+#DoAEPredict no
+
+# ClamD settings below
+
 # Uncomment this option to enable logging.
 # LogFile must be writable for the user running daemon.
 # A full path is required.

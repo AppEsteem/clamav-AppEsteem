@@ -5875,6 +5875,9 @@ cl_error_t cl_engine_free(struct cl_engine *engine)
 
         MPOOL_FREE(engine->mempool, root);
         TASK_COMPLETE();
+
+        /* unload predict */
+        cli_unload_predict();
     }
 
 #ifdef USE_MPOOL

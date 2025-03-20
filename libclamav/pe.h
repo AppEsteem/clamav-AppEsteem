@@ -87,8 +87,8 @@ enum {
 #define CLI_PEHEADER_OPT_STRICT_ON_PE_ERRORS 0x8
 #define CLI_PEHEADER_OPT_REMOVE_MISSING_SECTIONS 0x10
 
-extern cl_error_t cli_load_predict();
-extern cl_error_t cli_unload_predict();
+cl_error_t cli_load_predict();
+cl_error_t cli_unload_predict();
 
 cl_error_t cli_pe_targetinfo(cli_ctx *ctx, struct cli_exe_info *peinfo);
 cl_error_t cli_peheader(fmap_t *map, struct cli_exe_info *peinfo, uint32_t opts, cli_ctx *ctx);

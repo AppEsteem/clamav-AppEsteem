@@ -616,6 +616,9 @@ struct cl_engine *cl_engine_new(void)
 
 #endif
 
+    /* inidtialize prediciton */
+    cli_load_predict();
+
     cli_dbgmsg("Initialized %s engine\n", cl_retver());
     return new;
 }

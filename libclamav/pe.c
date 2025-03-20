@@ -331,7 +331,7 @@ static void *g_aepredict_handle;
 static Predict_t g_Predict;
 static DisposePredictionResult_t g_DisposePredictionResult;
 
-extern cl_error_t cli_load_predict()
+cl_error_t cli_load_predict()
 {
     cl_error_t retval = CL_ERROR;
 
@@ -382,7 +382,7 @@ extern cl_error_t cli_load_predict()
     return retval;
 }
 
-extern cl_error_t cli_unload_predict()
+cl_error_t cli_unload_predict()
 {
     cl_error_t retval = CL_ERROR;
 
@@ -2906,7 +2906,6 @@ static void add_section_info(cli_ctx *ctx, struct cli_exe_section *s)
 
 int cli_scanpe(cli_ctx *ctx)
 {
-#if 0
     uint8_t polipos = 0;
     char epbuff[4096], *tempfile;
     size_t epsize;
@@ -4538,7 +4537,6 @@ int cli_scanpe(cli_ctx *ctx)
 
     if (cli_json_timeout_cycle_check(ctx, &toval) != CL_SUCCESS)
         return CL_ETIMEOUT;
-#endif
 
     {
         int ret = CL_SUCCESS;

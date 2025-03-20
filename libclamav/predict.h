@@ -17,5 +17,6 @@ typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
 cl_error_t engine_unload_predict(struct cl_engine* engine);
 cl_error_t engine_load_predict(struct cl_engine* engine);
+cl_error_t call_predict(struct cli_ctx_tag *ctx);
 
 #endif

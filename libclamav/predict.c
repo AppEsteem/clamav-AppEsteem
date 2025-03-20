@@ -83,3 +83,53 @@ cl_error_t engine_unload_predict(struct cl_engine *engine)
     return retval;
 }
 
+/*
+ * TODO/To investigate
+ *
+ * 1) see if we can use the ctx->map and not re-open the file
+ */
+cl_error_t call_predict(cli_ctx *ctx) {
+    uint32_t retval = CL_SUCCESS;
+    /*cli_errmsg("call_predict: ctx->target_filepath: %s\n", ctx->target_filepath);*/
+ 
+    if(!ctx->engine->aepredict_handle || !ctx->engine->predict_handle || !ctx->engine->dispose_prediction_result_handle) {
+        cli_errmsg("call_predict: call cli_load_predict first\n");
+        return CL_ERROR;
+    }
+
+    const char* filename = ctx->target_filepath;
+    if(ctx && ctx->sub_filepath)
+    {
+        filename = ctx->sub_filepath;
+    }
+
+    // map contains memory-mapped file... let's pass that in and hope it works :-)
+    const void *buf = NULL;
+    uint32_t len = 0;
+    if(ctx && ctx->fmap && ctx->fmap->len) {
+        len = ctx->fmap->len;
+        if (!(buf = fmap_need_off_once(ctx->fmap, 0, ctx->fmap->len))) {
+            cli_errmsg("call_predict: error reading map\n");
+            return CL_EREAD;
+        }
+    }
+
+    /*cli_errmsg("call_predict: calling g_Predict\n");*/
+    PredictionResult *result = ctx->engine->predict_handle(filename, buf, len);
+
+    // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
+    if (result && result->shouldcheck) {
+        // note that the virus must some static string - nobody frees it later
+        cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
+        retval = CL_VIRUS;
+    }
+    /*cli_errmsg("call_predict: prediction result\n");*/
+
+    // clean up prediction results
+    if(result) {
+        ctx->engine->dispose_prediction_result_handle(result);
+    }
+
+    return retval;
+}
+

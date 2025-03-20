@@ -157,7 +157,7 @@ int main(int argc, char **argv)
     pid_t parentPid = getpid();
 
     /* AEScan Variables */
-    int do_local_scan = 0;
+    /*int do_local_scan = 0;*/
     threadpool_t *thr_pool;
     int idletimeout;
     int max_threads, max_queue = 0;
@@ -203,11 +203,19 @@ int main(int argc, char **argv)
     }
 
     /* AE Scan Option */
-    if (optget(opts, "LocalScanningFile")->enabled) {
-        local_scan_file = optget(opts, "LocalScanningFile")->strarg;
-        do_local_scan = 1;
-        fprintf(stderr, "LocalScanningFile: %s\n", local_scan_file);
+    if (opts->filename == NULL || *opts->filename == NULL) {
+        logg(LOGG_ERROR, "No filename specified for local scan\n");
+        optfree(opts);
+        return 1;
     }
+    /*else {*/
+    /*    logg(LOGG_ERROR, "file is %s\n", *opts->filename);*/
+    /*}*/
+    /*if (optget(opts, "LocalScanningFile")->enabled) {*/
+    /*    local_scan_file = optget(opts, "LocalScanningFile")->strarg;*/
+    /*    do_local_scan = 1;*/
+    /*    fprintf(stderr, "LocalScanningFile: %s\n", local_scan_file);*/
+    /*}*/
 
     /* check foreground option from command line to override config file */
     for (j = 0; j < argc; j += 1) {
@@ -436,11 +444,11 @@ int main(int argc, char **argv)
 
         logg(LOGG_INFO_NF, "Received %d file descriptor(s) from systemd.\n", num_fd);
 
-        if (!tcpsock && !localsock && num_fd == 0 && do_local_scan == 0) {
-            logg(LOGG_ERROR, "Please define server type (local and/or TCP), or pass a file for local scanning.\n");
-            ret = 1;
-            break;
-        }
+        /*if (!tcpsock && !localsock && num_fd == 0 && do_local_scan == 0) {*/
+        /*    logg(LOGG_ERROR, "Please define server type (local and/or TCP), or pass a file for local scanning.\n");*/
+        /*    ret = 1;*/
+        /*    break;*/
+        /*}*/
 
         logg(LOGG_INFO_NF, "clamd daemon %s (OS: " TARGET_OS_TYPE ", ARCH: " TARGET_ARCH_TYPE ", CPU: " TARGET_CPU_TYPE ")\n", get_version());
 
@@ -732,41 +740,35 @@ int main(int argc, char **argv)
             break;
         }
 
-        if (tcpsock || num_fd > 0) {
-            opt = optget(opts, "TCPAddr");
-            if (opt->enabled) {
-                int breakout = 0;
+        /*if (tcpsock || num_fd > 0) {*/
+        /*    opt = optget(opts, "TCPAddr");*/
+        /*    if (opt->enabled) {*/
+        /*        int breakout = 0;*/
+        /**/
+        /*        while (opt && opt->strarg) {*/
+        /*            char *ipaddr = (!strcmp(opt->strarg, "all") ? NULL : opt->strarg);*/
+        /**/
+        /*            if (tcpserver(&lsockets, &nlsockets, ipaddr, opts) == -1) {*/
+        /*                ret      = 1;*/
+        /*                breakout = 1;*/
+        /*                break;*/
+        /*            }*/
+        /**/
+        /*            opt = opt->nextarg;*/
+        /*        }*/
+        /**/
+        /*        if (breakout)*/
+        /*            break;*/
+        /*    } else {*/
+        /*        if (tcpserver(&lsockets, &nlsockets, NULL, opts) == -1) {*/
+        /*            ret = 1;*/
+        /*            break;*/
+        /*        }*/
+        /*    }*/
+        /*}*/
 
-                while (opt && opt->strarg) {
-                    char *ipaddr = (!strcmp(opt->strarg, "all") ? NULL : opt->strarg);
-
-                    if (tcpserver(&lsockets, &nlsockets, ipaddr, opts) == -1) {
-                        ret      = 1;
-                        breakout = 1;
-                        break;
-                    }
-
-                    opt = opt->nextarg;
-                }
-
-                if (breakout)
-                    break;
-            } else {
-                if (tcpserver(&lsockets, &nlsockets, NULL, opts) == -1) {
-                    ret = 1;
-                    break;
-                }
-            }
-        }
-
-        if (do_local_scan) {
-            if (opts->filename == NULL || *opts->filename == NULL) {
-                logg(LOGG_ERROR, "No filename specified for local scan\n");
-                /*ret = 1;*/
-                /*break;*/
-            } else {
-                logg(LOGG_ERROR, "file is %s\n", *opts->filename);
-            }
+        /*if (do_local_scan) {*/
+        if (true) {
             /*logg(LOGG_ERROR, "Going to do a local scan!!\n");*/
             max_threads = optget(opts, "MaxThreads")->numarg;
             max_queue   = optget(opts, "MaxQueue")->numarg;
@@ -820,7 +822,7 @@ int main(int argc, char **argv)
             /*conn.filename = buf->dumpname;*/
             /*conn.mode     = buf->mode;*/
             /*conn.term     = buf->term;*/
-            execute_or_dispatch_command(&conn, COMMAND_MULTISCAN, local_scan_file);
+            execute_or_dispatch_command(&conn, COMMAND_MULTISCAN, *opts->filename);
             /*logg(LOGG_INFO, "Dispatch done, now waiting for threads to finish.\n");*/
             thrmgr_wait_for_threads(thr_pool);
             /*logg(LOGG_INFO, "Threads finished!\n");*/
@@ -828,150 +830,150 @@ int main(int argc, char **argv)
             /*logg(LOGG_INFO, "killed pool\n");*/
         }
 
-#ifndef _WIN32
-        if (localsock && num_fd == 0) {
-            int *t;
-            mode_t sock_mode, umsk = umask(0777); /* socket is created with 000 to avoid races */
-
-            t = realloc(lsockets, sizeof(int) * (nlsockets + 1));
-            if (!(t)) {
-                ret = 1;
-                break;
-            }
-            lsockets = t;
-
-            if ((lsockets[nlsockets] = localserver(opts)) == -1) {
-                ret = 1;
-                umask(umsk);
-                break;
-            }
-            umask(umsk); /* restore umask */
-
-            if (optget(opts, "LocalSocketGroup")->enabled) {
-                char *gname    = optget(opts, "LocalSocketGroup")->strarg, *end;
-                gid_t sock_gid = strtol(gname, &end, 10);
-
-                if (*end) {
-                    struct group *pgrp = getgrnam(gname);
-
-                    if (!pgrp) {
-                        logg(LOGG_ERROR, "Unknown group %s\n", gname);
-                        ret = 1;
-                        break;
-                    }
-
-                    sock_gid = pgrp->gr_gid;
-                }
-                if (chown(optget(opts, "LocalSocket")->strarg, -1, sock_gid)) {
-                    logg(LOGG_ERROR, "Failed to change socket ownership to group %s\n", gname);
-                    ret = 1;
-                    break;
-                }
-            }
-            if (optget(opts, "LocalSocketMode")->enabled) {
-                char *end;
-
-                sock_mode = strtol(optget(opts, "LocalSocketMode")->strarg, &end, 8);
-
-                if (*end) {
-                    logg(LOGG_ERROR, "Invalid LocalSocketMode %s\n", optget(opts, "LocalSocketMode")->strarg);
-                    ret = 1;
-                    break;
-                }
-            } else {
-                sock_mode = 0777 /* & ~umsk*/; /* conservative default: umask was 0 in clamd < 0.96 */
-            }
-
-            if (chmod(optget(opts, "LocalSocket")->strarg, sock_mode & 0666)) {
-                logg(LOGG_ERROR, "Cannot set socket permission for %s to %3o\n", optget(opts, "LocalSocket")->strarg, sock_mode & 0666);
-                ret = 1;
-                break;
-            }
-
-            nlsockets++;
-        }
-
+/*#ifndef _WIN32*/
+/*        if (localsock && num_fd == 0) {*/
+/*            int *t;*/
+            /*mode_t sock_mode, umsk = umask(0777); /* socket is created with 000 to avoid races */
+/**/
+/*            t = realloc(lsockets, sizeof(int) * (nlsockets + 1));*/
+/*            if (!(t)) {*/
+/*                ret = 1;*/
+/*                break;*/
+/*            }*/
+/*            lsockets = t;*/
+/**/
+/*            if ((lsockets[nlsockets] = localserver(opts)) == -1) {*/
+/*                ret = 1;*/
+/*                umask(umsk);*/
+/*                break;*/
+/*            }*/
+/*            umask(umsk); /* restore umask */
+/**/
+/*            if (optget(opts, "LocalSocketGroup")->enabled) {*/
+/*                char *gname    = optget(opts, "LocalSocketGroup")->strarg, *end;*/
+/*                gid_t sock_gid = strtol(gname, &end, 10);*/
+/**/
+/*                if (*end) {*/
+/*                    struct group *pgrp = getgrnam(gname);*/
+/**/
+/*                    if (!pgrp) {*/
+/*                        logg(LOGG_ERROR, "Unknown group %s\n", gname);*/
+/*                        ret = 1;*/
+/*                        break;*/
+/*                    }*/
+/**/
+/*                    sock_gid = pgrp->gr_gid;*/
+/*                }*/
+/*                if (chown(optget(opts, "LocalSocket")->strarg, -1, sock_gid)) {*/
+/*                    logg(LOGG_ERROR, "Failed to change socket ownership to group %s\n", gname);*/
+/*                    ret = 1;*/
+/*                    break;*/
+/*                }*/
+/*            }*/
+/*            if (optget(opts, "LocalSocketMode")->enabled) {*/
+/*                char *end;*/
+/**/
+/*                sock_mode = strtol(optget(opts, "LocalSocketMode")->strarg, &end, 8);*/
+/**/
+/*                if (*end) {*/
+/*                    logg(LOGG_ERROR, "Invalid LocalSocketMode %s\n", optget(opts, "LocalSocketMode")->strarg);*/
+/*                    ret = 1;*/
+/*                    break;*/
+/*                }*/
+/*            } else {*/
+                //sock_mode = 0777 /* & ~umsk*/; /* conservative default: umask was 0 in clamd < 0.96 */
+/*            }*/
+/**/
+/*            if (chmod(optget(opts, "LocalSocket")->strarg, sock_mode & 0666)) {*/
+/*                logg(LOGG_ERROR, "Cannot set socket permission for %s to %3o\n", optget(opts, "LocalSocket")->strarg, sock_mode & 0666);*/
+/*                ret = 1;*/
+/*                break;*/
+/*            }*/
+/**/
+/*            nlsockets++;*/
+/*        }*/
+/**/
         /* check for local sockets passed by systemd */
-        if (num_fd > 0) {
-            int *t;
-            t = realloc(lsockets, sizeof(int) * (nlsockets + 1));
-            if (!(t)) {
-                ret = 1;
-                break;
-            }
-            lsockets = t;
-
-            lsockets[nlsockets] = localserver(opts);
-            if (lsockets[nlsockets] == -1) {
-                ret = 1;
-                break;
-            } else if (lsockets[nlsockets] > 0) {
-                nlsockets++;
-            }
-        }
-
-        if (0 == foreground) {
-            if (!debug_mode) {
-                if (chdir("/") == -1) {
-                    logg(LOGG_WARNING, "Can't change current working directory to root\n");
-                }
-            }
-
-#ifndef _WIN32
-
-            /*Since some of the logging is written to stderr, and some of it
-             * is written to a log file, close stdin, stderr, and stdout
-             * now, since everything is initialized.*/
-
+/*        if (num_fd > 0) {*/
+/*            int *t;*/
+/*            t = realloc(lsockets, sizeof(int) * (nlsockets + 1));*/
+/*            if (!(t)) {*/
+/*                ret = 1;*/
+/*                break;*/
+/*            }*/
+/*            lsockets = t;*/
+/**/
+/*            lsockets[nlsockets] = localserver(opts);*/
+/*            if (lsockets[nlsockets] == -1) {*/
+/*                ret = 1;*/
+/*                break;*/
+/*            } else if (lsockets[nlsockets] > 0) {*/
+/*                nlsockets++;*/
+/*            }*/
+/*        }*/
+/**/
+/*        if (0 == foreground) {*/
+/*            if (!debug_mode) {*/
+/*                if (chdir("/") == -1) {*/
+/*                    logg(LOGG_WARNING, "Can't change current working directory to root\n");*/
+/*                }*/
+/*            }*/
+/**/
+/*#ifndef _WIN32*/
+/**/
+/*            /*Since some of the logging is written to stderr, and some of it*/
+/*             * is written to a log file, close stdin, stderr, and stdout*/
+             /* now, since everything is initialized.*/
+/**/
             /*signal the parent process.*/
-            if (parentPid != getpid()) {
-                daemonize_signal_parent(parentPid);
-            }
-#endif
-        }
+/*            if (parentPid != getpid()) {*/
+/*                daemonize_signal_parent(parentPid);*/
+/*            }*/
+/*#endif*/
+/*        }*/
+/**/
+/*#elif defined(_WIN32)*/
+/*        if (optget(opts, "service-mode")->enabled) {*/
+/*            cl_engine_set_clcb_sigload(engine, NULL, NULL);*/
+/*            svc_ready();*/
+/*        }*/
+/*#endif*/
+/**/
+/*        if (nlsockets == 0 && do_local_scan == 0) {*/
+/*            logg(LOGG_ERROR, "Not listening on any interfaces\n");*/
+/*            ret = 1;*/
+/*            break;*/
+/*        }*/
 
-#elif defined(_WIN32)
-        if (optget(opts, "service-mode")->enabled) {
-            cl_engine_set_clcb_sigload(engine, NULL, NULL);
-            svc_ready();
-        }
-#endif
-
-        if (nlsockets == 0 && do_local_scan == 0) {
-            logg(LOGG_ERROR, "Not listening on any interfaces\n");
-            ret = 1;
-            break;
-        }
-
-        if (do_local_scan == 0) {
-            ret = recvloop(lsockets, nlsockets, engine, dboptions, opts);
-        } else {
-            /* wait for threadpool to be done? */
-        }
+        /*if (do_local_scan == 0) {*/
+        /*    ret = recvloop(lsockets, nlsockets, engine, dboptions, opts);*/
+        /*} else {*/
+        /*    /* wait for threadpool to be done? */
+        /*}*/
 
     } while (0);
 
-    if (num_fd == 0 && do_local_scan == 0) {
-        logg(LOGG_DEBUG, "Closing the main socket%s.\n", (nlsockets > 1) ? "s" : "");
-
-        for (i = 0; i < nlsockets; i++) {
-            closesocket(lsockets[i]);
-        }
-#ifndef _WIN32
-        if (nlsockets && localsock) {
-            opt = optget(opts, "LocalSocket");
-
-            if (unlink(opt->strarg) == -1)
-                logg(LOGG_ERROR, "Can't unlink the socket file %s\n", opt->strarg);
-            else
-                logg(LOGG_INFO, "Socket file removed.\n");
-        }
-#endif
-    }
-
-    if (do_local_scan == 0) {
-        free(lsockets);
-    }
+/*    if (num_fd == 0 && do_local_scan == 0) {*/
+/*        logg(LOGG_DEBUG, "Closing the main socket%s.\n", (nlsockets > 1) ? "s" : "");*/
+/**/
+/*        for (i = 0; i < nlsockets; i++) {*/
+/*            closesocket(lsockets[i]);*/
+/*        }*/
+/*#ifndef _WIN32*/
+/*        if (nlsockets && localsock) {*/
+/*            opt = optget(opts, "LocalSocket");*/
+/**/
+/*            if (unlink(opt->strarg) == -1)*/
+/*                logg(LOGG_ERROR, "Can't unlink the socket file %s\n", opt->strarg);*/
+/*            else*/
+/*                logg(LOGG_INFO, "Socket file removed.\n");*/
+/*        }*/
+/*#endif*/
+/*    }*/
+/**/
+/*    if (do_local_scan == 0) {*/
+/*        free(lsockets);*/
+/*    }*/
 
     logg_close();
     optfree(opts);

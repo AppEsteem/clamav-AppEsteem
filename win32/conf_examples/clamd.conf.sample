@@ -7,6 +7,21 @@
 # Comment or remove the line below.
 Example
 
+# AE Conf Settings 
+# Enable AE Predict
+# Default: yes
+#DoAEPredict no
+
+# Path to the database directory.
+# Default: hardcoded (depends on installation options)
+#DatabaseDirectory "C:\Program Files\ClamAV\database"
+
+# Optional path to the global temporary directory.
+# Default: system specific (usually /tmp or /var/tmp).
+#TemporaryDirectory "C:\temp"
+
+# ClamD settings below
+
 # Uncomment this option to enable logging.
 # LogFile must be writable for the user running daemon.
 # A full path is required.
@@ -63,14 +78,6 @@ Example
 # daemon.
 # Default: disabled
 #PidFile "C:\Program Files\ClamAV\clamd.pid"
-
-# Optional path to the global temporary directory.
-# Default: system specific (usually /tmp or /var/tmp).
-#TemporaryDirectory "C:\temp"
-
-# Path to the database directory.
-# Default: hardcoded (depends on installation options)
-#DatabaseDirectory "C:\Program Files\ClamAV\database"
 
 # Only load the official signatures published by the ClamAV project.
 # Default: no

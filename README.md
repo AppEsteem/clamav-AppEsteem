@@ -1,7 +1,5 @@
 # AE-Scan changes
-- added a flag "--local-scanning-file" to `clamd` to select which directoryto scan 
-- this will disable the socket functionality and run the scan without a daemon
-- in order to run: `clamd --local-scanning-file <folder/file to scan> --datadir=<directory with signature files>`
+- in order to run: `clamd --datadir=<directory with signature files> <folder/file to scan>`
 - for building on windows
   - set up with https://docs.clamav.net/manual/Installing/Installing-from-source-Windows.html
     - use vcpkg (not mussels)
@@ -34,7 +32,7 @@ ninja
 ninja install
 ```
 
-Then, go to `build/install/etc/`, and copy `clamd.conf.sample` into `clamd.conf`. Then remove the word "Example" in that file.      
+Then, go to `build/install/etc/`, and copy `clamd.conf.sample` into `aescan.conf`. Then remove the word "Example" in that file. Change any configuration settings under "AE Conf Settings".
 
 # ClamAV
 

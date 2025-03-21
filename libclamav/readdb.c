@@ -123,7 +123,7 @@ char *cli_virname(const char *virname, unsigned int official)
         cli_errmsg("cli_virname: Can't allocate memory for newname\n");
         return NULL;
     }
-    sprintf(newname, "%s.UNOFFICIAL", virname);
+    sprintf(newname, "%s.AE", virname);
     return newname;
 }
 

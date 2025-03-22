@@ -12,6 +12,10 @@ typedef struct PredictionResult_t {
     int confidence; // how confident we are with this verdit (H/M/L)
 } PredictionResult;
 
+typedef uint32_t PredictionReturn;
+
+#define PREDICT_VIRNAME "Request_Inspection.AE"
+
 typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 

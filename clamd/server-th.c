@@ -151,8 +151,11 @@ void scanner_thread(void *arg)
     if (thrmgr_group_finished(conn->group, exit_code)) {
         logg(LOGG_DEBUG_NV, "Scanthread: connection shut down (FD %d)\n", conn->sd);
         /* close connection if we were last in group */
-        shutdown(conn->sd, 2);
-        closesocket(conn->sd);
+        // TODO: socket shouldn't be open on local scan. also, don't we need to call thrmgr_group_terminate?
+        if(!(conn->options->general & AE_SCAN_LOCAL_SCAN)) {
+            shutdown(conn->sd, 2);
+            closesocket(conn->sd);
+        }
     }
     cl_engine_free(conn->engine);
     free(conn);

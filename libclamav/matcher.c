@@ -601,10 +601,10 @@ cl_error_t cli_check_fp(cli_ctx *ctx, const char *vname)
          * MD5 is default, so it always exists.
          */
         if (cli_hm_scan(digest, size, &virname, ctx->engine->hm_fp, CLI_HASH_MD5) == CL_VIRUS) {
-            cli_dbgmsg("cli_check_fp(md5): Found false positive detection (fp sig: %s), size: %d\n", virname, (int)size);
+            cli_dbgmsg("cli_check_fp(md5): Found false positive detection md5 (fp sig: %s), size: %d\n", virname, (int)size);
             return CL_CLEAN;
         } else if (cli_hm_scan_wild(digest, &virname, ctx->engine->hm_fp, CLI_HASH_MD5) == CL_VIRUS) {
-            cli_dbgmsg("cli_check_fp(md5): Found false positive detection (fp sig: %s), size: *\n", virname);
+            cli_dbgmsg("cli_check_fp(md5): Found false positive detection md5 (fp sig: %s), size: *\n", virname);
             return CL_CLEAN;
         }
 
@@ -628,17 +628,17 @@ cl_error_t cli_check_fp(cli_ctx *ctx, const char *vname)
                     cl_sha1(ptr, size, &shash1[SHA1_HASH_SIZE], NULL);
 
                     if (cli_hm_scan(&shash1[SHA1_HASH_SIZE], size, &virname, ctx->engine->hm_fp, CLI_HASH_SHA1) == CL_VIRUS) {
-                        cli_dbgmsg("cli_check_fp(sha1): Found false positive detection (fp sig: %s)\n", virname);
+                        cli_dbgmsg("cli_check_fp(sha1): Found false positive detection sha1 (fp sig: %s)\n", virname);
                         return CL_CLEAN;
                     }
                     if (cli_hm_scan_wild(&shash1[SHA1_HASH_SIZE], &virname, ctx->engine->hm_fp, CLI_HASH_SHA1) == CL_VIRUS) {
-                        cli_dbgmsg("cli_check_fp(sha1): Found false positive detection (fp sig: %s)\n", virname);
+                        cli_dbgmsg("cli_check_fp(sha1): Found false positive detection sha1 (fp sig: %s)\n", virname);
                         return CL_CLEAN;
                     }
                     /* See whether the hash matches those loaded in from .cat files
                      * (associated with the .CAB file type) */
                     if (cli_hm_scan(&shash1[SHA1_HASH_SIZE], 1, &virname, ctx->engine->hm_fp, CLI_HASH_SHA1) == CL_VIRUS) {
-                        cli_dbgmsg("cli_check_fp(sha1): Found .CAB false positive detection via catalog file\n");
+                        cli_dbgmsg("cli_check_fp(sha1): Found .CAB false positive detection sha1 via catalog file\n");
                         return CL_CLEAN;
                     }
                 }
@@ -647,17 +647,17 @@ cl_error_t cli_check_fp(cli_ctx *ctx, const char *vname)
                     cl_sha256(ptr, size, &shash256[SHA256_HASH_SIZE], NULL);
 
                     if (cli_hm_scan(&shash256[SHA256_HASH_SIZE], size, &virname, ctx->engine->hm_fp, CLI_HASH_SHA256) == CL_VIRUS) {
-                        cli_dbgmsg("cli_check_fp(sha256): Found false positive detection (fp sig: %s)\n", virname);
+                        cli_dbgmsg("cli_check_fp(sha256): Found false positive detection sha256 (fp sig: %s)\n", virname);
                         return CL_CLEAN;
                     }
                     if (cli_hm_scan_wild(&shash256[SHA256_HASH_SIZE], &virname, ctx->engine->hm_fp, CLI_HASH_SHA256) == CL_VIRUS) {
-                        cli_dbgmsg("cli_check_fp(sha256): Found false positive detection (fp sig: %s)\n", virname);
+                        cli_dbgmsg("cli_check_fp(sha256): Found false positive detection sha256 (fp sig: %s)\n", virname);
                         return CL_CLEAN;
                     }
                     /* See whether the hash matches those loaded in from .cat files
                      * (associated with the .CAB file type) */
                     if (cli_hm_scan(&shash256[SHA256_HASH_SIZE], 1, &virname, ctx->engine->hm_fp, CLI_HASH_SHA256) == CL_VIRUS) {
-                        cli_dbgmsg("cli_check_fp(sha256): Found .CAB false positive detection via catalog file\n");
+                        cli_dbgmsg("cli_check_fp(sha256): Found .CAB false positive detection sha256 via catalog file\n");
                         return CL_CLEAN;
                     }
                 }

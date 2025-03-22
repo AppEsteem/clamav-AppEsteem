@@ -119,9 +119,10 @@ cl_error_t call_predict(cli_ctx *ctx) {
 
     // cli_errmsg("returning predict for %s: shouldcheck %s\n", filename, result ? result->shouldcheck ? "YES": "NO" : "NULL");
     if (result && result->shouldcheck) {
-        // note that the virus must some static string - nobody frees it later
-        cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
-        retval = CL_VIRUS;
+        // note that the virus must be some static string - nobody frees it later
+        // also note: cli_append_virus will return CL_SUCCESS if this was an fp, and CL_VIRUS if not
+        //      we need to trust the retval so we can honor the fp check
+        retval = cli_append_virus(ctx, "AppEsteem_Requests_Inspection");
     }
     /*cli_errmsg("call_predict: prediction result\n");*/
 

@@ -5878,8 +5878,8 @@ cl_error_t cl_engine_free(struct cl_engine *engine)
         MPOOL_FREE(engine->mempool, root);
         TASK_COMPLETE();
 
-        /* unload predict */
-        engine_unload_predict(engine);
+        engine->predict_handle = NULL;
+        engine->dispose_prediction_result_handle = NULL;
     }
 
 #ifdef USE_MPOOL

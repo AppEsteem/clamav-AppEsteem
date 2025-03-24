@@ -619,10 +619,8 @@ struct cl_engine *cl_engine_new(void)
 #endif
 
     /* initialize prediciton */
-    new->aepredict_handle = NULL;
     new->predict_handle = NULL;
     new->dispose_prediction_result_handle = NULL;
-    engine_load_predict(new);
 
     cli_dbgmsg("Initialized %s engine\n", cl_retver());
     return new;

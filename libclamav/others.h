@@ -468,7 +468,6 @@ struct cl_engine {
 #endif
 
     /* AE Predict Callbacks */ 
-    void *aepredict_handle;
     Predict_t predict_handle; // pointer to the prediction function
     DisposePredictionResult_t dispose_prediction_result_handle; // pointer to the prediction result disposal function
 };

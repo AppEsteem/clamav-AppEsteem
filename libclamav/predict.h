@@ -19,8 +19,6 @@ typedef uint32_t PredictionReturn;
 typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
 
-cl_error_t engine_unload_predict(struct cl_engine* engine);
-cl_error_t engine_load_predict(struct cl_engine* engine);
 cl_error_t call_predict(struct cli_ctx_tag *ctx);
 
 #endif

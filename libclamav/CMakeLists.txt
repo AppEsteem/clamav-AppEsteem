@@ -409,8 +409,8 @@ if(ENABLE_SHARED_LIB)
         SOVERSION ${LIBCLAMAV_SOVERSION}
         LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/libclamav.map)
 
-    set(CSHARP_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/csharp_libs")
-    target_link_directories(clamav PUBLIC ${CSHARP_LIB_DIR})
+    # set(CSHARP_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/csharp_libs")
+    # target_link_directories(clamav PUBLIC ${CSHARP_LIB_DIR})
 
     target_sources( clamav
         PRIVATE
@@ -441,9 +441,21 @@ if(ENABLE_SHARED_LIB)
             BZip2::BZip2
             PCRE2::pcre2
             LibXml2::LibXml2
-            JSONC::jsonc
-            AePredict )
+            JSONC::jsonc )
 
+    if(WIN32)
+        target_link_libraries( clamav
+            PUBLIC
+                crypt32
+                psapi)
+        find_package(liblzma CONFIG REQUIRED)
+        find_package(Iconv)
+        target_link_libraries ( clamav 
+            PUBLIC
+                liblzma::liblzma
+                Iconv::Iconv)
+    endif()
+        
     if(WIN32)
         target_link_libraries( clamav
             PUBLIC

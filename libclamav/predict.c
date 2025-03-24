@@ -108,7 +108,7 @@ cl_error_t call_predict(cli_ctx *ctx) {
     uint32_t len = 0;
     if(ctx && ctx->fmap && ctx->fmap->len) {
         len = ctx->fmap->len;
-        if (!(buf = fmap_need_off_once(ctx->fmap, 0, ctx->fmap->len))) {
+        if (!(buf = fmap_need_off(ctx->fmap, 0, ctx->fmap->len))) { // this was need_off_once
             cli_errmsg("call_predict: error reading map\n");
             return CL_EREAD;
         }
@@ -128,6 +128,9 @@ cl_error_t call_predict(cli_ctx *ctx) {
         ctx->engine->dispose_prediction_result_handle(result);
         result = NULL;
     }
+
+    // un-need the memory mapping
+    fmap_unneed_off(ctx->fmap, 0, ctx->fmap->len);
 
     return retval;
 }

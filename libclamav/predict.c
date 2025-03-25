@@ -59,7 +59,20 @@ cl_error_t call_predict(cli_ctx *ctx) {
         // note that the virus name must be some static string - nobody frees it later
         // also note: cli_append_virus will return CL_SUCCESS if this was an fp, and CL_VIRUS if not
         //      we need to trust the retval so we can honor the fp check
-        retval = cli_append_virus(ctx, PREDICT_VIRNAME);
+        const char *virname = PREDICT_VIRNAME;
+        switch(result->confidence)
+        {
+            case 'H':
+                virname = PREDICT_VIRNAME_H;
+                break;
+            case 'M':
+                virname = PREDICT_VIRNAME_M;
+                break;
+            case 'L':
+                virname = PREDICT_VIRNAME_L;
+                break;
+        }
+        retval = cli_append_virus(ctx, virname);
     }
 
     // free up prediction results

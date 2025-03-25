@@ -70,9 +70,9 @@ cl_error_t call_predict(cli_ctx *ctx) {
                 break;
         }
         retval = cli_append_virus(ctx, virname);
-        if(retval == CL_VIRUS) {
-            cli_errmsg("filename [%s] confidence [%c] virname [%s]\n", filename, result->confidence, virname);
-        }
+        // if(retval == CL_VIRUS) {
+        //     cli_errmsg("filename [%s] confidence [%c] virname [%s]\n", filename, result->confidence, virname);
+        // }
     }
 
     // free up prediction results

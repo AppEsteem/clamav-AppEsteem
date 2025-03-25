@@ -11,9 +11,11 @@
 
 cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_handle, DisposePredictionResult_t dispose_handle)
 {
+    // cli_errmsg("cl_set_predict_funcs engine 0x%x predict_handle 0x%x\n");
+
     if(engine) {
-        engine->predict_handle = NULL;
-        engine->dispose_prediction_result_handle = NULL;
+        engine->predict_handle = predict_handle;
+        engine->dispose_prediction_result_handle = dispose_handle;
         return CL_SUCCESS;
     }
 
@@ -27,7 +29,7 @@ cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_hand
  */
 cl_error_t call_predict(cli_ctx *ctx) {
     uint32_t retval = CL_SUCCESS;
-    /*cli_errmsg("call_predict: ctx->target_filepath: %s\n", ctx->target_filepath);*/
+    // cli_errmsg("call_predict: ctx->target_filepath: %s\n", ctx->target_filepath);
  
     if(!ctx->engine->predict_handle || !ctx->engine->dispose_prediction_result_handle) {
         cli_errmsg("call_predict: call cl_set_predict_funcs first\n");

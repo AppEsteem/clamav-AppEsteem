@@ -68,11 +68,11 @@ cl_error_t call_predict(cli_ctx *ctx) {
             case 'M':
                 virname = PREDICT_VIRNAME_M;
                 break;
-            case 'L':
-                virname = PREDICT_VIRNAME_L;
-                break;
         }
         retval = cli_append_virus(ctx, virname);
+        if(retval == CL_VIRUS) {
+            cli_errmsg("filename [%s] confidence [%c] virname [%s]\n", filename, result->confidence, virname);
+        }
     }
 
     // free up prediction results

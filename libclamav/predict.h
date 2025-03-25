@@ -14,7 +14,6 @@ typedef struct PredictionResult_t {
 
 #define PREDICT_VIRNAME_H "Request_Inspection_HIGH.AE"
 #define PREDICT_VIRNAME_M "Request_Inspection_MED.AE"
-#define PREDICT_VIRNAME_L "Request_Inspection_LOW.AE"
 #define PREDICT_VIRNAME "Request_Inspection.AE"
 
 typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);

@@ -1,4 +1,6 @@
-#define RES_FNAME "libclamav.dll"
-#define RES_NAME "libclamav"
-#define RES_FDESC "ClamAV - libclamav"
+#define RES_FNAME "libaescan.dll"
+#define RES_NAME "libaescan"
+#define RES_FDESC "AppEsteem Corporation - libaescan"
 #include "common.rc"
+
+1337 ICON "aescan.ico"

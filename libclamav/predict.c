@@ -9,9 +9,17 @@
 // for engine and LoadLibrary
 #include "others.h"
 
-cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_handle, DisposePredictionResult_t dispose_handle)
+static LogPredict_t g_logfunc = NULL;
+
+cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_handle, DisposePredictionResult_t dispose_handle, LogPredict_t log_handle)
 {
     // cli_errmsg("cl_set_predict_funcs engine 0x%x predict_handle 0x%x\n");
+
+    if(log_handle) {
+        g_logfunc = log_handle;
+        // send messages to func below
+        cl_set_clcb_msg(predict_log);
+    }
 
     if(engine) {
         engine->predict_handle = predict_handle;
@@ -22,11 +30,16 @@ cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_hand
     return CL_ERROR;
 }
 
-/*
- * TODO/To investigate
- *
- * 1) see if we can use the ctx->map and not re-open the file
- */
+void predict_log(enum cl_msg severity, const char *fullmsg, const char *msg, void *context)
+{
+    if(g_logfunc) {
+        (g_logfunc)("LibScan", msg);
+    }
+
+    // else swallow the messages :-)
+}
+
+// this uses the memory mapped file. we pass the filepath only for debugging/reference
 cl_error_t call_predict(cli_ctx *ctx) {
     uint32_t retval = CL_SUCCESS;
     // cli_errmsg("call_predict: ctx->target_filepath: %s\n", ctx->target_filepath);

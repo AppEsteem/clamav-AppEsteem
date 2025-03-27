@@ -16,9 +16,12 @@ typedef struct PredictionResult_t {
 #define PREDICT_VIRNAME_M "Request_Inspection_MED.AE"
 #define PREDICT_VIRNAME "Request_Inspection.AE"
 
+// callbacks into aescan: do the prediction, dispose of the results, and log things
 typedef PredictionResult* (*Predict_t)(const char *filename, const void *buf, uint32_t len);
 typedef void (*DisposePredictionResult_t)(PredictionResult* result);
+typedef void (*LogPredict_t)(const char *level, const char *msg);
 
 cl_error_t call_predict(struct cli_ctx_tag *ctx);
+void predict_log(enum cl_msg severity, const char *fullmsg, const char *msg, void *context);
 
 #endif

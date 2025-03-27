@@ -266,7 +266,7 @@ int cl_initialize_crypto(void);
  */
 void cl_cleanup_crypto(void);
 
-extern cl_error_t cl_set_predict_funcs(struct cl_engine* engine, void *predict_handle, void *dispose_handle);
+extern cl_error_t cl_set_predict_funcs(struct cl_engine* engine, void *predict_handle, void *dispose_handle, void *log_handle);
 
 #define CL_INIT_DEFAULT 0x0
 /**

@@ -788,8 +788,10 @@ static cl_error_t cvdgetfileage(const char *path, time_t *age_seconds)
         return CL_EOPEN;
     }
 
-    if ((status = cli_cvdverify(fs, &cvd, 1)) != CL_SUCCESS)
+    if ((status = cli_cvdverify(fs, &cvd, 1)) != CL_SUCCESS) {
+        cli_errmsg("cvdgetfileage: Can't verify file %s\n", path);
         goto done;
+    }
 
     time(&s_time);
 

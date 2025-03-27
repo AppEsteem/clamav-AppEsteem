@@ -442,7 +442,12 @@ if(ENABLE_SHARED_LIB)
             PCRE2::pcre2
             LibXml2::LibXml2
             JSONC::jsonc )
-
+    if(WIN32)
+        target_sources( clamav
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}/win32/res/libclamav.rc )
+    endif()
+        
     if(WIN32)
         target_link_libraries( clamav
             PUBLIC

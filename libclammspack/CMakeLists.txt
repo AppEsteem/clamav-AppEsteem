@@ -53,7 +53,7 @@ set(MSPACK_SOURCES
     mspack/szddd.c
 )
 
-if(ENABLE_SHARED_LIB)
+if(NOT ENABLE_STATIC_SUB_LIBS)
     # The mspack shared library.
     add_library( clammspack SHARED )
     set_target_properties(clammspack PROPERTIES
@@ -89,7 +89,7 @@ if(ENABLE_SHARED_LIB)
     add_library( ClamAV::libmspack ALIAS clammspack )
 endif()
 
-if(ENABLE_STATIC_LIB)
+if(ENABLE_STATIC_SUB_LIBS)
     # The clamav static library.
     add_library( clammspack_static STATIC)
     target_sources( clammspack_static

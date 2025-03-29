@@ -432,7 +432,7 @@ if(ENABLE_SHARED_LIB)
             lzma_sdk
             yara
             bytecode_runtime
-            ${LIBMSPACK}
+            ${LIBMSPACK}_static
             ClamAV::libclamav_rust
             ClamAV::libunrar_iface_iface
             OpenSSL::SSL

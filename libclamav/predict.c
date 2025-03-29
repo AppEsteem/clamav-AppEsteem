@@ -11,6 +11,20 @@
 
 static LogPredict_t g_logfunc = NULL;
 
+// memory management calling back to internal funcs fmap_need_off and fmap_unneed_off
+// we need these because predict threads can timeout and return empty results, leaving the
+// thread still running and using the mapped memory. this lets the thread grab/release the
+// memory when it starts/completes, separate from the timeout
+void *cl_predict_grab_map(void *ref, size_t len)
+{
+    return fmap_need_off((fmap_t *) ref, 0, len);
+}
+
+void cl_predict_release_map(void *ref, size_t len)
+{
+    fmap_unneed_off((fmap_t *) ref, 0, len);
+}
+
 cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_handle, DisposePredictionResult_t dispose_handle, LogPredict_t log_handle)
 {
     // cli_errmsg("cl_set_predict_funcs engine 0x%x predict_handle 0x%x\n");
@@ -55,17 +69,15 @@ cl_error_t call_predict(cli_ctx *ctx) {
         filename = ctx->sub_filepath;
     }
 
-    // map contains memory-mapped file... let's pass that in and hope it works :-)
+    // map contains memory-mapped file... thread will have to grab/release this memory
     const void *buf = NULL;
-    uint32_t len = 0;
+    size_t len = 0;
     if(ctx && ctx->fmap && ctx->fmap->len) {
         len = ctx->fmap->len;
-        if (!(buf = fmap_need_off(ctx->fmap, 0, ctx->fmap->len))) { // this was need_off_once
-            cli_errmsg("call_predict: error reading map\n");
-            return CL_EREAD;
-        }
+        buf = ctx->fmap;
     }
 
+    // note that this may timeout - this is why we have moved the fmap memory need/unneding into the mlpredict code
     PredictionResult *result = ctx->engine->predict_handle(filename, buf, len);
 
     if (result && result->shouldcheck) {
@@ -93,9 +105,6 @@ cl_error_t call_predict(cli_ctx *ctx) {
         ctx->engine->dispose_prediction_result_handle(result);
         result = NULL;
     }
-
-    // un-need the memory mapping
-    fmap_unneed_off(ctx->fmap, 0, ctx->fmap->len);
 
     return retval;
 }

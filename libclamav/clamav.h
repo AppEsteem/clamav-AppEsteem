@@ -266,7 +266,12 @@ int cl_initialize_crypto(void);
  */
 void cl_cleanup_crypto(void);
 
+// ml callback
 extern cl_error_t cl_set_predict_funcs(struct cl_engine* engine, void *predict_handle, void *dispose_handle, void *log_handle);
+
+// ml memory management of mem-mapped buffers - allowing threads to timeout without wreaking havoc on protected memory
+extern void *cl_predict_grab_map(void *ref, size_t len);
+extern void cl_predict_release_map(void *ref, size_t len);
 
 #define CL_INIT_DEFAULT 0x0
 /**

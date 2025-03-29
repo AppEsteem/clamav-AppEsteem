@@ -15,7 +15,7 @@ static LogPredict_t g_logfunc = NULL;
 // we need these because predict threads can timeout and return empty results, leaving the
 // thread still running and using the mapped memory. this lets the thread grab/release the
 // memory when it starts/completes, separate from the timeout
-void *cl_predict_grab_map(void *ref, size_t len)
+const void *cl_predict_grab_map(void *ref, size_t len)
 {
     return fmap_need_off((fmap_t *) ref, 0, len);
 }
@@ -53,6 +53,19 @@ void predict_log(enum cl_msg severity, const char *fullmsg, const char *msg, voi
     // else swallow the messages :-)
 }
 
+// set tmmpdir. we put this code here because it uses an enum which may change over time
+cl_error_t cl_predict_set_tempdir(struct cl_engine *engine, char *tmpdir)
+{
+    cl_error_t ret = CL_SUCCESS;
+    if ((ret = cl_engine_set_str(engine, CL_ENGINE_TMPDIR, tmpdir))) {
+        cli_errmsg("cli_engine_set_str(CL_ENGINE_TMPDIR) failed: %s\n", cl_strerror(ret));
+        ret = CL_ERROR;
+    } else {
+        cli_errmsg("TemporaryDirectory set to %s\n", tmpdir);
+    }
+    return ret;
+}
+
 // this uses the memory mapped file. we pass the filepath only for debugging/reference
 cl_error_t call_predict(cli_ctx *ctx) {
     uint32_t retval = CL_SUCCESS;
@@ -75,35 +88,40 @@ cl_error_t call_predict(cli_ctx *ctx) {
     if(ctx && ctx->fmap && ctx->fmap->len) {
         len = ctx->fmap->len;
         buf = ctx->fmap;
-    }
 
-    // note that this may timeout - this is why we have moved the fmap memory need/unneding into the mlpredict code
-    PredictionResult *result = ctx->engine->predict_handle(filename, buf, len);
+        // note that this may timeout - this is why we have moved the fmap memory need/unneding into the mlpredict code
+        PredictionResult *result = ctx->engine->predict_handle(filename, buf, len);
 
-    if (result && result->shouldcheck) {
-        // note that the virus name must be some static string - nobody frees it later
-        // also note: cli_append_virus will return CL_SUCCESS if this was an fp, and CL_VIRUS if not
-        //      we need to trust the retval so we can honor the fp check
-        const char *virname = PREDICT_VIRNAME;
-        switch(result->confidence)
-        {
-            case 'H':
-                virname = PREDICT_VIRNAME_H;
-                break;
-            case 'M':
-                virname = PREDICT_VIRNAME_M;
-                break;
+        if(result == (int) (-1)) { // special timeout
+            // the only way we get here was after a timeout
+            cli_errmsg("TIMEOUT filename [%s] len [%d]\n", filename, len);
+            // now figure out how to handle this using the release... we have to keep the fmap active
         }
-        retval = cli_append_virus(ctx, virname);
-        // if(retval == CL_VIRUS) {
-        //     cli_errmsg("filename [%s] confidence [%c] virname [%s]\n", filename, result->confidence, virname);
-        // }
-    }
+        else if (result > 0 && result->shouldcheck) {
+            // note that the virus name must be some static string - nobody frees it later
+            // also note: cli_append_virus will return CL_SUCCESS if this was an fp, and CL_VIRUS if not
+            //      we need to trust the retval so we can honor the fp check
+            const char *virname = PREDICT_VIRNAME;
+            switch(result->confidence)
+            {
+                case 'H':
+                    virname = PREDICT_VIRNAME_H;
+                    break;
+                case 'M':
+                    virname = PREDICT_VIRNAME_M;
+                    break;
+            }
+            retval = cli_append_virus(ctx, virname);
+            // if(retval == CL_VIRUS) {
+            //     cli_errmsg("filename [%s] confidence [%c] virname [%s]\n", filename, result->confidence, virname);
+            // }
+        }
 
-    // free up prediction results
-    if(result) {
-        ctx->engine->dispose_prediction_result_handle(result);
-        result = NULL;
+        // free up prediction results if we received a valid result
+        if(result > 0) {
+            ctx->engine->dispose_prediction_result_handle(result);
+            result = NULL;
+        }
     }
 
     return retval;

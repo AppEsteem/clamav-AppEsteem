@@ -22,7 +22,15 @@ const void *cl_predict_grab_map(void *ref, size_t len)
 
 void cl_predict_release_map(void *ref, size_t len)
 {
-    fmap_unneed_off((fmap_t *) ref, 0, len);
+    fmap_t *m = (fmap_t *) ref;
+    fmap_unneed_off(m, 0, len);
+
+    // if we had timed out before and now we're waiting for release, we can unmap
+    if(m->timed_out && m->waiting_for_release) {
+        m->timed_out = false;
+        m->waiting_for_release = false;
+        funmap(m);
+    }
 }
 
 cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_handle, DisposePredictionResult_t dispose_handle, LogPredict_t log_handle)
@@ -95,7 +103,16 @@ cl_error_t call_predict(cli_ctx *ctx) {
         if(result == (int) (-1)) { // special timeout
             // the only way we get here was after a timeout
             cli_errmsg("TIMEOUT filename [%s] len [%d]\n", filename, len);
-            // now figure out how to handle this using the release... we have to keep the fmap active
+
+            // set the map->timed_out to true so that funmap doesn't delete it while the thread continues to run
+            ctx->fmap->timed_out = true;
+
+            // TODO: trying to account for a race condition here where the timeed-out thread finishes after the line above -- still not perfect
+            if(ctx->fmap->waiting_for_release) {
+                ctx->fmap->timed_out = false;
+                ctx->fmap->waiting_for_release = false;
+                funmap(ctx->fmap);
+            }
         }
         else if (result > 0 && result->shouldcheck) {
             // note that the virus name must be some static string - nobody frees it later
@@ -118,7 +135,7 @@ cl_error_t call_predict(cli_ctx *ctx) {
         }
 
         // free up prediction results if we received a valid result
-        if(result > 0) {
+        if(result != (int) (-1) && result > 0) {
             ctx->engine->dispose_prediction_result_handle(result);
             result = NULL;
         }

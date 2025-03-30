@@ -859,6 +859,8 @@ fmap_t *fmap_open_memory(const void *start, size_t len, const char *name)
     m->need_offstr = mem_need_offstr;
     m->gets        = mem_gets;
     m->unneed_off  = mem_unneed_off;
+    m->waiting_for_release = false;
+    m->timed_out = false;
 
     if (NULL != name) {
         /* Copy the name, if one is given */

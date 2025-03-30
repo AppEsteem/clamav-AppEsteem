@@ -92,6 +92,8 @@ struct cl_fmap {
     unsigned char sha256[CLI_HASHLEN_SHA256];
     uint64_t *bitmap;
     char *name;
+    bool waiting_for_release; // funmap sets this to true if timed_out is true, so release can finish the unmap
+    bool timed_out; // don't funmap if this is true -- let release do it instead
 };
 
 /**
@@ -157,7 +159,14 @@ void free_duplicate_fmap(cl_fmap_t *map);
  */
 static inline void funmap(fmap_t *m)
 {
-    m->unmap(m);
+    // if we timed out, then don't release. just set waiting_for_release to true
+    if(m->timed_out && !m->waiting_for_release) {
+        m->waiting_for_release = true;
+    } else {
+        m->timed_out = false;
+        m->waiting_for_release = false;
+        m->unmap(m);
+    }
 }
 
 /**

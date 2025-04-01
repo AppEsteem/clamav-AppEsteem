@@ -98,11 +98,22 @@ cl_error_t call_predict(cli_ctx *ctx) {
         buf = ctx->fmap;
 
         // note that this may timeout - this is why we have moved the fmap memory need/unneding into the mlpredict code
-        PredictionResult *result = ctx->engine->predict_handle(filename, buf, len);
+        PredictionResult *result = NULL;
+        
+        // don't call prediction for any embedded files
+        if(ctx && filename == ctx->target_filepath) {
+            // don't pass buf and len for now
+            result = ctx->engine->predict_handle(filename, NULL, 0);
+            // result = ctx->engine->predict_handle(filename, buf, len);
+        }
 
         if(result == (int) (-1)) { // special timeout
             // the only way we get here was after a timeout
-            cli_errmsg("TIMEOUT filename [%s] len [%d]\n", filename, len);
+            if(ctx->sub_filepath) {
+                cli_errmsg("TIMEOUT filename [%s] on embedded [%s] len [%d]\n", ctx->target_filepath, filename, len);
+            } else {
+                cli_errmsg("TIMEOUT filename [%s] len [%d]\n", filename, ctx->target_filepath, len);
+            }
 
             // set the map->timed_out to true so that funmap doesn't delete it while the thread continues to run
             ctx->fmap->timed_out = true;

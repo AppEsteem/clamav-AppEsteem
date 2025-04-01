@@ -25,7 +25,12 @@ cmake .. -G Ninja                   \
     -D CMAKE_INSTALL_PREFIX=install \
     -D ENABLE_MILTER=ON             \
     -D ENABLE_EXAMPLES=ON           \
-    -D ENABLE_STATIC_LIB=ON         \
+    -D ENABLE_STATIC_LIB=OFF        \
+    -D ENABLE_SHARED_LIB=ON         \
+    -D ENABLE_TESTS=false           \
+    -D ENABLE_LIBCLAMAV_ONLY=TRUE   \
+    -D ENABLE_CLAMD_ONLY=TRUE       \
+    -D ENABLE_STATIC_SUB_LIBS="ON"  \
     -D ENABLE_SYSTEMD=OFF
 
 ninja

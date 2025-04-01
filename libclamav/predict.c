@@ -33,7 +33,7 @@ void cl_predict_release_map(void *ref, size_t len)
     }
 }
 
-cl_error_t cl_set_predict_funcs(struct cl_engine* engine, Predict_t predict_handle, DisposePredictionResult_t dispose_handle, LogPredict_t log_handle)
+cl_error_t cl_set_predict_funcs(struct cl_engine* engine, void* predict_handle, void* dispose_handle, void* log_handle)
 {
     // cli_errmsg("cl_set_predict_funcs engine 0x%x predict_handle 0x%x\n");
 

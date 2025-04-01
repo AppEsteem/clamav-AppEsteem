@@ -59,6 +59,8 @@ CLAMAV_PUBLIC {
     cl_hash_destroy;
     cl_engine_stats_enable;
     lsig_sub_matched;
+    cl_set_predict_funcs;
+    cl_predict_set_tempdir;
 };
 CLAMAV_0.104.0 {
   global:
